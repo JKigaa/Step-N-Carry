@@ -1,0 +1,309 @@
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { ArrowLeft, Plus, Search, Edit2, Trash2, Star, TrendingUp, Package } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/use-auth';
+import { formatKsh, SHOE_CATEGORIES } from '@/lib/store-constants';
+import { toast } from 'sonner';
+import type { Product, ProductSize } from '@/types/db';
+
+interface AdminProductsPageProps {
+  navigate: (to: string) => void;
+}
+
+type ProductWithSizes = Product & { sizes: ProductSize[] };
+
+const EMPTY_FORM = {
+  name: '', brand: '', category: 'Sneakers', description: '',
+  price: '', images: '', stock: '', is_available: true, is_featured: false, is_popular: false,
+};
+
+type ProductForm = typeof EMPTY_FORM;
+
+export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  const [products, setProducts] = useState<ProductWithSizes[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
+  const [sizes, setSizes] = useState<{ size: string; stock: string }[]>([
+    { size: '39', stock: '10' }, { size: '40', stock: '10' }, { size: '41', stock: '10' },
+    { size: '42', stock: '10' }, { size: '43', stock: '5' },
+  ]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && (!user || !isAdmin)) { navigate('/signin'); return; }
+  }, [user, isAdmin, authLoading, navigate]);
+
+  const loadProducts = async () => {
+    const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    if (!prods) { setLoading(false); return; }
+    const ids = prods.map((p) => p.id);
+    const { data: szs } = await supabase.from('product_sizes').select('*').in('product_id', ids).order('size');
+    const sizeMap = new Map<string, ProductSize[]>();
+    for (const s of szs ?? []) { const arr = sizeMap.get(s.product_id) ?? []; arr.push(s); sizeMap.set(s.product_id, arr); }
+    setProducts(prods.map((p) => ({ ...(p as Product), sizes: sizeMap.get(p.id) ?? [] })));
+    setLoading(false);
+  };
+
+  useEffect(() => { if (isAdmin) loadProducts(); }, [isAdmin]);
+
+  const openAdd = () => {
+    setEditProduct(null);
+    setForm(EMPTY_FORM);
+    setSizes([
+      { size: '39', stock: '10' }, { size: '40', stock: '10' }, { size: '41', stock: '10' },
+      { size: '42', stock: '10' }, { size: '43', stock: '5' },
+    ]);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (p: ProductWithSizes) => {
+    setEditProduct(p);
+    setForm({
+      name: p.name, brand: p.brand, category: p.category, description: p.description,
+      price: String(p.price), images: p.images.join('\n'), stock: String(p.stock),
+      is_available: p.is_available, is_featured: p.is_featured, is_popular: p.is_popular,
+    });
+    setSizes(p.sizes.length > 0 ? p.sizes.map((s) => ({ size: s.size, stock: String(s.stock) })) : [{ size: '40', stock: '10' }]);
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name || !form.price || !form.brand) { toast.error('Name, brand, and price are required'); return; }
+    const price = parseInt(form.price);
+    if (isNaN(price) || price < 0) { toast.error('Invalid price'); return; }
+    setSaving(true);
+    try {
+      const images = form.images.split('\n').map((s) => s.trim()).filter(Boolean);
+      const productData = {
+        name: form.name, brand: form.brand, category: form.category,
+        description: form.description, price, images,
+        stock: parseInt(form.stock) || 0,
+        is_available: form.is_available, is_featured: form.is_featured, is_popular: form.is_popular,
+        updated_at: new Date().toISOString(),
+      };
+
+      let productId = editProduct?.id;
+
+      if (editProduct) {
+        const { error } = await supabase.from('products').update(productData).eq('id', editProduct.id);
+        if (error) throw error;
+        await supabase.from('product_sizes').delete().eq('product_id', editProduct.id);
+      } else {
+        const { data, error } = await supabase.from('products').insert(productData).select().single();
+        if (error) throw error;
+        productId = data.id;
+      }
+
+      // Insert sizes
+      const sizeRows = sizes.filter((s) => s.size).map((s) => ({
+        product_id: productId!, size: s.size, stock: parseInt(s.stock) || 0,
+      }));
+      if (sizeRows.length > 0) {
+        const { error } = await supabase.from('product_sizes').insert(sizeRows);
+        if (error) throw error;
+      }
+
+      toast.success(editProduct ? 'Product updated' : 'Product added');
+      setDialogOpen(false);
+      await loadProducts();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save product');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) { toast.error('Failed to delete'); return; }
+    toast.success('Product deleted');
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const toggleAvailability = async (id: string, current: boolean) => {
+    await supabase.from('products').update({ is_available: !current }).eq('id', id);
+    setProducts((prev) => prev.map((p) => p.id === id ? { ...p, is_available: !current } : p));
+  };
+
+  const filtered = products.filter((p) =>
+    !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (authLoading || !user || !isAdmin) return null;
+
+  return (
+    <div className="min-h-screen bg-muted/20">
+      <div className="border-b border-border/60 bg-white px-6 py-4">
+        <div className="mx-auto flex max-w-7xl items-center gap-4">
+          <button onClick={() => navigate('/admin')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Dashboard
+          </button>
+          <h1 className="text-xl font-bold">Products</h1>
+          <div className="ml-auto flex items-center gap-3">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-9 w-56" />
+            </div>
+            <Button onClick={openAdd}><Plus className="mr-1 h-4 w-4" /> Add Product</Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {loading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-40 animate-pulse rounded-xl bg-muted" />)}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((p) => (
+              <div key={p.id} className="rounded-xl border border-border/60 bg-card overflow-hidden">
+                <div className="relative h-48">
+                  <img src={p.images[0] ?? ''} alt={p.name} className="h-full w-full object-cover" />
+                  <div className="absolute right-2 top-2 flex gap-1">
+                    {p.is_featured && <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">Featured</span>}
+                    {p.is_popular && <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">Popular</span>}
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">{p.brand} · {p.category}</p>
+                      <h3 className="font-semibold">{p.name}</h3>
+                      <p className="font-bold text-primary">{formatKsh(p.price)}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Switch checked={p.is_available} onCheckedChange={() => toggleAvailability(p.id, p.is_available)} className="scale-75" />
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {p.sizes.slice(0, 5).map((s) => (
+                      <span key={s.size} className={`rounded px-1.5 py-0.5 text-[10px] font-medium border ${s.stock > 0 ? 'border-border text-muted-foreground' : 'border-red-200 bg-red-50 text-red-500 line-through'}`}>
+                        {s.size}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Stock: {p.stock}</span>
+                    {p.stock <= 5 && <span className="text-xs font-medium text-amber-600">Low stock</span>}
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(p)}>
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(p.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Nike Air Max" />
+              </div>
+              <div className="space-y-2">
+                <Label>Brand</Label>
+                <Input value={form.brand} onChange={(e) => setForm((f) => ({ ...f, brand: e.target.value }))} placeholder="Nike" />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select value={form.category} onValueChange={(v) => setForm((f) => ({ ...f, category: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{SHOE_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Price (KSh)</Label>
+                <Input type="number" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="3500" min="0" />
+              </div>
+              <div className="space-y-2">
+                <Label>Total Stock</Label>
+                <Input type="number" value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} placeholder="50" min="0" />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Description</Label>
+                <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} placeholder="Describe the shoe..." />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Image URLs (one per line)</Label>
+                <Textarea value={form.images} onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))} rows={3} placeholder="https://images.pexels.com/..." />
+              </div>
+            </div>
+
+            {/* Sizes */}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <Label>Sizes & Stock</Label>
+                <Button type="button" size="sm" variant="outline" onClick={() => setSizes((s) => [...s, { size: '', stock: '10' }])}>
+                  <Plus className="mr-1 h-3 w-3" /> Add Size
+                </Button>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {sizes.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input value={s.size} onChange={(e) => setSizes((prev) => prev.map((sz, idx) => idx === i ? { ...sz, size: e.target.value } : sz))} placeholder="Size (e.g. 40)" className="w-24" />
+                    <Input type="number" value={s.stock} onChange={(e) => setSizes((prev) => prev.map((sz, idx) => idx === i ? { ...sz, stock: e.target.value } : sz))} placeholder="Stock" className="w-24" min="0" />
+                    <span className="text-xs text-muted-foreground">{parseInt(s.stock) === 0 ? 'Sold out' : 'In stock'}</span>
+                    <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => setSizes((prev) => prev.filter((_, idx) => idx !== i))}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Flags */}
+            <div className="flex flex-wrap gap-6">
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_available} onCheckedChange={(v) => setForm((f) => ({ ...f, is_available: v }))} id="available" />
+                <Label htmlFor="available">Available</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_featured} onCheckedChange={(v) => setForm((f) => ({ ...f, is_featured: v }))} id="featured" />
+                <Label htmlFor="featured">Featured</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_popular} onCheckedChange={(v) => setForm((f) => ({ ...f, is_popular: v }))} id="popular" />
+                <Label htmlFor="popular">Popular</Label>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : editProduct ? 'Update Product' : 'Add Product'}</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
