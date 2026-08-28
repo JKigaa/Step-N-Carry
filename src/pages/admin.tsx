@@ -79,7 +79,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
               <span className="font-extrabold text-primary-foreground">F</span>
             </div>
             <div>
-              <p className="font-bold leading-none">Fancy Shoes Admin</p>
+              <p className="font-bold leading-none">Step N Carry Admin</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>
             </div>
           </div>

@@ -31,16 +31,16 @@ export default function App() {
 
   useEffect(() => {
     const titles: Record<string, string> = {
-      '/': 'Fancy Shoes — Online Shoe Store Kenya',
-      '/shop': 'Shop Shoes — Fancy Shoes',
-      '/cart': 'Your Cart — Fancy Shoes',
-      '/checkout': 'Checkout — Fancy Shoes',
-      '/signin': 'Sign In — Fancy Shoes',
-      '/signup': 'Create Account — Fancy Shoes',
-      '/account': 'My Account — Fancy Shoes',
-      '/admin': 'Admin Dashboard — Fancy Shoes',
+      '/': 'Step N Carry — Online Shoe Store Kenya',
+      '/shop': 'Shop Shoes — Step N Carry',
+      '/cart': 'Your Cart — Step N Carry',
+      '/checkout': 'Checkout — Step N Carry',
+      '/signin': 'Sign In — Step N Carry',
+      '/signup': 'Create Account — Step N Carry',
+      '/account': 'My Account — Step N Carry',
+      '/admin': 'Admin Dashboard — Step N Carry',
     };
-    document.title = titles[path] ?? 'Fancy Shoes — Online Shoe Store Kenya';
+    document.title = titles[path] ?? 'Step N Carry — Online Shoe Store Kenya';
   }, [path]);
 
   const top = segments[0] ?? '';

@@ -69,7 +69,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
             <span className="text-xl font-extrabold text-primary-foreground">S</span>
           </div>
           <h1 className="text-2xl font-bold">Create Account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Join Fancy Shoes and start shopping</p>
+          <p className="mt-1 text-sm text-muted-foreground">Join Step N Carry and start shopping</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

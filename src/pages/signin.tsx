@@ -49,7 +49,7 @@ export function SignInPage({ navigate }: AuthPageProps) {
             <span className="text-xl font-extrabold text-primary-foreground">S</span>
           </div>
           <h1 className="text-2xl font-bold">Welcome Back</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to your Fancy Shoes account</p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to your Step N Carry account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

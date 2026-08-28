@@ -73,7 +73,7 @@ export function Footer({ navigate }: FooterProps) {
         </div>
 
         <div className="mt-8 border-t border-border/40 pt-6 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Fancy Shoes Kenya. All rights reserved. Prices in Kenyan Shillings (KSh).</p>
+          <p>&copy; {new Date().getFullYear()} Step N Carry Kenya. All rights reserved. Prices in Kenyan Shillings (KSh).</p>
         </div>
       </div>
     </footer>
