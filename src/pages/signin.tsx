@@ -12,16 +12,16 @@ interface AuthPageProps {
 }
 
 export function SignInPage({ navigate }: AuthPageProps) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      navigate(isAdmin ? '/admin' : '/account');
-    }
-  }, [user, isAdmin, navigate]);
+  if (!authLoading && user) {
+    navigate(isAdmin ? '/admin' : '/account');
+  }
+}, [user, isAdmin, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

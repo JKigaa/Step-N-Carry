@@ -50,9 +50,10 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
         },
       });
       if (error) throw error;
-      if (data.user) {
-        toast.success('Account created successfully');
-      }
+     if (data.user) {
+  toast.success('Account created successfully');
+  navigate('/signin');
+}
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create account');
     } finally {
