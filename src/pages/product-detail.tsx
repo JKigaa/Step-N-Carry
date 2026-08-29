@@ -246,7 +246,7 @@ export function ProductDetailPage({ navigate, productId }: ProductDetailPageProp
           <div className="mt-8 grid grid-cols-3 gap-3 border-t border-border pt-6">
             {[
               { icon: Truck, label: 'Nationwide delivery' },
-              { icon: RotateCcw, label: '7-day returns' },
+              { icon: RotateCcw, label: '5-day returns' },
               { icon: Shield, label: 'Secure checkout' },
             ].map((b) => (
               <div key={b.label} className="flex flex-col items-center gap-1 text-center">

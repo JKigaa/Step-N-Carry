@@ -81,11 +81,15 @@ export function OrderReviewPage({ navigate }: OrderReviewPageProps) {
           delivery_address: data.deliveryAddress,
           county: data.county,
           town: data.town,
+          payment_method: paymentMethod,
         })
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+  	console.error('ORDER INSERT ERROR:', orderError);
+  	throw orderError;
+	}
 
       // Create order items
       const orderItems = data.items.map((item) => ({

@@ -21,6 +21,7 @@ interface OrderWithProfile {
   phone: string;
   county: string;
   town: string;
+  payment_method: string | null;
   created_at: string;
 }
 
@@ -35,18 +36,63 @@ export function AdminOrdersPage({ navigate }: AdminOrdersPageProps) {
     if (!authLoading && (!user || !isAdmin)) { navigate('/signin'); return; }
   }, [user, isAdmin, authLoading, navigate]);
 
-  useEffect(() => {
+      useEffect(() => {
     if (!isAdmin) return;
-    (async () => {
-      const { data } = await supabase
+
+    let mounted = true;
+
+    const loadOrders = async () => {
+      const { data, error } = await supabase
         .from('orders')
-        .select('id, order_number, status, total, full_name, phone, county, town, created_at')
+        .select('id, order_number, status, total, full_name, phone, county, town, created_at, payment_method')
         .order('created_at', { ascending: false });
-      setOrders((data ?? []) as OrderWithProfile[]);
-      setLoading(false);
-    })();
+
+      if (error) {
+        console.error('ORDERS LOAD ERROR:', error);
+      }
+
+      if (mounted) {
+        setOrders((data ?? []) as OrderWithProfile[]);
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+
+    const channel = supabase
+      .channel('admin-orders-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          console.log('REALTIME NEW ORDER:', payload.new);
+
+          const newOrder = payload.new as OrderWithProfile;
+
+          setOrders((current) => {
+            if (current.some((order) => order.id === newOrder.id)) {
+              return current;
+            }
+
+            return [newOrder, ...current];
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('ADMIN ORDERS REALTIME:', status);
+      });
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
   }, [isAdmin]);
 
+    
   const filtered = orders.filter((o) => {
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
     const matchSearch = !search
@@ -114,6 +160,10 @@ export function AdminOrdersPage({ navigate }: AdminOrdersPageProps) {
                       <span className="ml-2 text-sm text-muted-foreground">{order.phone}</span>
                     </div>
                   </div>
+                    <span className="rounded-md border border-border/60 px-2 py-1 text-xs font-medium">
+                      {order.payment_method === "cod" ? "Pay on Delivery" : order.payment_method === "mpesa" ? "M-Pesa" : order.payment_method === "card" ? "Card Payment" : "Not specified"}
+                    </span>
+
                   <div className="flex items-center gap-3">
                     <StatusBadge status={order.status} />
                     <span className="font-bold">{formatKsh(order.total)}</span>

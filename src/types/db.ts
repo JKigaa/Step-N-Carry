@@ -69,6 +69,7 @@ export interface Order {
   delivery_address: string;
   county: string;
   town: string;
+  payment_method: string | null;
   expected_delivery_date: string | null;
   expected_delivery_window: string;
   delivery_notes: string;

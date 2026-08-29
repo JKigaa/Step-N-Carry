@@ -12,7 +12,7 @@ export function Footer({ navigate }: FooterProps) {
           {[
             { icon: Truck, title: 'Nationwide Delivery', desc: 'To all 47 counties' },
             { icon: Shield, title: 'Secure Checkout', desc: 'Your data is protected' },
-            { icon: RotateCcw, title: 'Easy Returns', desc: '7-day return policy' },
+            { icon: RotateCcw, title: 'Easy Returns', desc: '5-day return policy' },
           ].map((badge) => (
             <div key={badge.title} className="flex items-center gap-3 justify-center sm:justify-start">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -65,7 +65,7 @@ export function Footer({ navigate }: FooterProps) {
           <div>
             <h4 className="mb-3 text-sm font-semibold">Contact</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +254 702918650</li>
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +254 700 000 000</li>
               <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@stepncarry.co.ke</li>
               <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Nairobi, Kenya</li>
             </ul>
