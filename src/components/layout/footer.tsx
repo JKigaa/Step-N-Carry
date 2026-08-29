@@ -32,9 +32,9 @@ export function Footer({ navigate }: FooterProps) {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <span className="text-lg font-extrabold text-primary-foreground">F</span>
+                <span className="text-lg font-extrabold text-primary-foreground">SnC</span>
               </div>
-              <span className="text-lg font-bold">Fancy<span className="text-primary"> Shoes</span></span>
+              <span className="text-lg font-bold">Step N<span className="text-primary"> Carry</span></span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               Kenya's premier online shoe store. Quality footwear delivered to your doorstep, wherever you are.
@@ -65,8 +65,8 @@ export function Footer({ navigate }: FooterProps) {
           <div>
             <h4 className="mb-3 text-sm font-semibold">Contact</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +254 700 000 000</li>
-              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@fancyshoes.co.ke</li>
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +254 702918650</li>
+              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@stepncarry.co.ke</li>
               <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Nairobi, Kenya</li>
             </ul>
           </div>

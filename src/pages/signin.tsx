@@ -52,7 +52,7 @@ export function SignInPage({ navigate }: AuthPageProps) {
           <p className="mt-1 text-sm text-muted-foreground">Sign in to your Step N Carry account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <div className="relative">
@@ -87,6 +87,7 @@ export function SignInPage({ navigate }: AuthPageProps) {
                 type="password"
                 placeholder="••••••••"
                 value={password}
+                autoComplete="new-password"
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-9"
                 required
@@ -99,11 +100,7 @@ export function SignInPage({ navigate }: AuthPageProps) {
           </Button>
         </form>
 
-        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
-          <p className="font-semibold text-amber-800">Admin Demo Account:</p>
-          <p className="mt-1 text-amber-700">Email: admin@shoestore.co.ke</p>
-          <p className="text-amber-700">Password: admin12345</p>
-        </div>
+       
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don't have an account?{' '}

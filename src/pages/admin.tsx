@@ -76,7 +76,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <span className="font-extrabold text-primary-foreground">F</span>
+              <span className="font-extrabold text-primary-foreground">SnC</span>
             </div>
             <div>
               <p className="font-bold leading-none">Step N Carry Admin</p>

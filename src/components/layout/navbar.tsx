@@ -74,10 +74,10 @@ export function Navbar({ navigate, path }: NavbarProps) {
         {/* Logo */}
         <button onClick={() => navigate('/')} className="flex shrink-0 items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-extrabold text-primary-foreground">F</span>
+            <span className="text-xl font-extrabold text-primary-foreground">SnC</span>
           </div>
           <span className="hidden text-lg font-bold tracking-tight text-foreground sm:inline">
-            Fancy<span className="text-primary"> Shoes</span>
+            Step N<span className="text-primary"> Carry</span>
           </span>
         </button>
 
