@@ -65,7 +65,7 @@ export function Footer({ navigate }: FooterProps) {
           <div>
             <h4 className="mb-3 text-sm font-semibold">Contact</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +254 700 000 000</li>
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +254 702 918 650</li>
               <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@stepncarry.co.ke</li>
               <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Nairobi, Kenya</li>
             </ul>
