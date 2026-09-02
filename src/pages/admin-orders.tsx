@@ -37,60 +37,54 @@ export function AdminOrdersPage({ navigate }: AdminOrdersPageProps) {
   }, [user, isAdmin, authLoading, navigate]);
 
       useEffect(() => {
-    if (!isAdmin) return;
+  if (!isAdmin) return;
 
-    let mounted = true;
+  let mounted = true;
 
-    const loadOrders = async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('id, order_number, status, total, full_name, phone, county, town, created_at, payment_method')
-        .order('created_at', { ascending: false });
+  const loadOrders = async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('id, order_number, status, total, full_name, phone, county, town, created_at, payment_method')
+      .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('ORDERS LOAD ERROR:', error);
+    if (error) {
+      console.error('ORDERS LOAD ERROR:', error);
+    }
+
+    if (mounted) {
+      setOrders((data ?? []) as OrderWithProfile[]);
+      setLoading(false);
+    }
+  };
+
+  loadOrders();
+
+  const channel = supabase
+  .channel('admin-orders-realtime')
+  .on('system', '*', (payload) => {
+    console.log('REALTIME SYSTEM:', payload);
+  })
+  .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'orders',
+      },
+      (payload) => {
+        console.log('REALTIME ORDER CHANGE:', payload);
+        loadOrders();
       }
+    )
+    .subscribe((status) => {
+      console.log('ADMIN ORDERS REALTIME:', status);
+    });
 
-      if (mounted) {
-        setOrders((data ?? []) as OrderWithProfile[]);
-        setLoading(false);
-      }
-    };
-
-    loadOrders();
-
-    const channel = supabase
-      .channel('admin-orders-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'orders',
-        },
-        (payload) => {
-          console.log('REALTIME NEW ORDER:', payload.new);
-
-          const newOrder = payload.new as OrderWithProfile;
-
-          setOrders((current) => {
-            if (current.some((order) => order.id === newOrder.id)) {
-              return current;
-            }
-
-            return [newOrder, ...current];
-          });
-        }
-      )
-      .subscribe((status) => {
-        console.log('ADMIN ORDERS REALTIME:', status);
-      });
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
-  }, [isAdmin]);
+  return () => {
+    mounted = false;
+    supabase.removeChannel(channel);
+  };
+}, [isAdmin]);
 
     
   const filtered = orders.filter((o) => {
