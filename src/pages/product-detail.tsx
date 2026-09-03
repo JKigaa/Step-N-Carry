@@ -20,6 +20,7 @@ export function ProductDetailPage({ navigate, productId }: ProductDetailPageProp
   const [selectedSize, setSelectedSize] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [isRotationPaused, setIsRotationPaused] = useState(false);
   const { addItem } = useCart();
   const { user } = useAuth();
 
@@ -28,9 +29,18 @@ export function ProductDetailPage({ navigate, productId }: ProductDetailPageProp
       setLoading(true);
       const p = await fetchProductById(productId);
       setProduct(p);
+      setActiveImage(0);
       setLoading(false);
     })();
   }, [productId]);
+
+  useEffect(() => {
+    if (!product || product.images.length <= 1 || isRotationPaused) return;
+    const intervalId = setInterval(() => {
+      setActiveImage((i) => (i + 1) % product.images.length);
+    }, 3000);
+    return () => clearInterval(intervalId);
+  }, [product, isRotationPaused]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -102,11 +112,17 @@ export function ProductDetailPage({ navigate, productId }: ProductDetailPageProp
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Image gallery */}
         <div>
-          <div className="aspect-square overflow-hidden rounded-xl border border-border/60 bg-muted/30">
+          <div
+            className="aspect-square overflow-hidden rounded-xl border border-border/60 bg-muted/30"
+            onMouseEnter={() => setIsRotationPaused(true)}
+            onMouseLeave={() => setIsRotationPaused(false)}
+            onTouchStart={() => setIsRotationPaused(true)}
+            onTouchEnd={() => setIsRotationPaused(false)}
+          >
             <img
               src={product.images[activeImage] ?? product.images[0] ?? ''}
               alt={product.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-opacity duration-300"
             />
           </div>
           {product.images.length > 1 && (
