@@ -151,9 +151,6 @@ export function Navbar({ navigate, path }: NavbarProps) {
                     <DropdownMenuItem onClick={() => navigate('/account/orders')}>
                       <Package className="mr-2 h-4 w-4" /> My Orders
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/account/profile')}>
-                      <User className="mr-2 h-4 w-4" /> Edit Profile
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/account/password')}>
                       <Lock className="mr-2 h-4 w-4" /> Change Password
                     </DropdownMenuItem>
