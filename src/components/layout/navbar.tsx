@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, User, Search, Menu, X, Package, LogOut, LayoutDashboard, Bell } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, Package, LogOut, LayoutDashboard, Bell, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -150,6 +150,12 @@ export function Navbar({ navigate, path }: NavbarProps) {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/account/orders')}>
                       <Package className="mr-2 h-4 w-4" /> My Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/account/profile')}>
+                      <User className="mr-2 h-4 w-4" /> Edit Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/account/password')}>
+                      <Lock className="mr-2 h-4 w-4" /> Change Password
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/account/notifications')}>
                       <Bell className="mr-2 h-4 w-4" /> Notifications

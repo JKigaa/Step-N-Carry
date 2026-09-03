@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Save, Lock } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { KENYAN_COUNTIES } from '@/lib/store-constants';
@@ -113,17 +113,6 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
           <Save className="mr-2 h-4 w-4" /> {saving ? 'Saving...' : 'Save Changes'}
         </Button>
       </form>
-
-      {/* Password change */}
-      <div className="mt-6 flex items-center justify-between rounded-xl border border-border/60 bg-card p-5">
-        <div>
-          <h2 className="text-lg font-bold">Password</h2>
-          <p className="text-sm text-muted-foreground">Change your account password</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => navigate('/account/password')}>
-          <Lock className="mr-2 h-4 w-4" /> Change Password
-        </Button>
-      </div>
     </div>
   );
 }
