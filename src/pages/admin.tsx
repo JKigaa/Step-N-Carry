@@ -84,21 +84,6 @@ export function AdminPage({ navigate }: AdminPageProps) {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <span className="font-extrabold text-primary-foreground">SnC</span>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Settings">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem onClick={() => navigate('/account/profile')}>
-                  <User className="mr-2 h-4 w-4" /> Edit Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/account/profile?password=1')}>
-                  <Lock className="mr-2 h-4 w-4" /> Change Password
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
             <div>
               <p className="font-bold leading-none">Step N Carry Admin</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>
@@ -106,6 +91,21 @@ export function AdminPage({ navigate }: AdminPageProps) {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate('/')}>View Store</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" aria-label="Settings">
+                  <Settings className="mr-1 h-4 w-4" /> Settings
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/account/profile')}>
+                  <User className="mr-2 h-4 w-4" /> Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/account/password')}>
+                  <Lock className="mr-2 h-4 w-4" /> Change Password
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost" size="sm" onClick={() => signOut().then(() => navigate('/'))}>
               <LogOut className="mr-1 h-4 w-4" /> Sign Out
             </Button>

@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Lock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { KENYAN_COUNTIES } from '@/lib/store-constants';
@@ -13,10 +13,9 @@ import { toast } from 'sonner';
 
 interface AccountProfilePageProps {
   navigate: (to: string) => void;
-  params?: Record<string, string>;
 }
 
-export function AccountProfilePage({ navigate, params }: AccountProfilePageProps) {
+export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
   const { user, profile, refreshProfile, loading: authLoading } = useAuth();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -24,18 +23,10 @@ export function AccountProfilePage({ navigate, params }: AccountProfilePageProps
   const [county, setCounty] = useState('');
   const [town, setTown] = useState('');
   const [saving, setSaving] = useState(false);
-  const [changingPassword, setChangingPassword] = useState(false);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) { navigate('/signin'); return; }
   }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (params?.password === '1') setChangingPassword(true);
-  }, [params]);
 
   useEffect(() => {
     if (profile) {
@@ -61,33 +52,6 @@ export function AccountProfilePage({ navigate, params }: AccountProfilePageProps
       toast.success('Profile updated');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!oldPassword) { toast.error('Enter your current password'); return; }
-    if (newPassword.length < 6) { toast.error('New password must be at least 6 characters'); return; }
-    if (newPassword !== confirmPassword) { toast.error('New password and confirmation do not match'); return; }
-    setSaving(true);
-    try {
-      const email = user?.email ?? profile?.email;
-      if (!email) throw new Error('Could not verify your account email');
-
-      const { error: verifyError } = await supabase.auth.signInWithPassword({ email, password: oldPassword });
-      if (verifyError) throw new Error('Current password is incorrect');
-
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      toast.success('Password updated');
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setChangingPassword(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to update password');
     } finally {
       setSaving(false);
     }
@@ -151,30 +115,14 @@ export function AccountProfilePage({ navigate, params }: AccountProfilePageProps
       </form>
 
       {/* Password change */}
-      <div className="mt-6 rounded-xl border border-border/60 bg-card p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Change Password</h2>
-          <Button variant="outline" size="sm" onClick={() => setChangingPassword((v) => !v)}>
-            {changingPassword ? 'Cancel' : 'Change'}
-          </Button>
+      <div className="mt-6 flex items-center justify-between rounded-xl border border-border/60 bg-card p-5">
+        <div>
+          <h2 className="text-lg font-bold">Password</h2>
+          <p className="text-sm text-muted-foreground">Change your account password</p>
         </div>
-        {changingPassword && (
-          <form onSubmit={handlePasswordChange} className="mt-4 space-y-3">
-            <div className="space-y-2">
-              <Label htmlFor="oldPassword">Current Password</Label>
-              <Input id="oldPassword" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Enter current password" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" required minLength={6} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" required minLength={6} />
-            </div>
-            <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Update Password'}</Button>
-          </form>
-        )}
+        <Button variant="outline" size="sm" onClick={() => navigate('/account/password')}>
+          <Lock className="mr-2 h-4 w-4" /> Change Password
+        </Button>
       </div>
     </div>
   );

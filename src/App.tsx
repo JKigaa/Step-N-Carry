@@ -18,6 +18,7 @@ import { ForgotPasswordPage } from '@/pages/forgot-password';
 import { AccountPage } from '@/pages/account';
 import { AccountOrdersPage } from '@/pages/account-orders';
 import { AccountProfilePage } from '@/pages/account-profile';
+import { AccountPasswordPage } from '@/pages/account-password';
 import { AccountNotificationsPage } from '@/pages/account-notifications';
 import { OrderDetailPage } from '@/pages/order-detail';
 import { AdminPage } from '@/pages/admin';
@@ -62,7 +63,8 @@ export default function App() {
     if (top === 'account') {
       const sub = segments[1];
       if (sub === 'orders') return <AccountOrdersPage navigate={navigate} />;
-      if (sub === 'profile') return <AccountProfilePage navigate={navigate} params={router.params} />;
+      if (sub === 'profile') return <AccountProfilePage navigate={navigate} />;
+      if (sub === 'password') return <AccountPasswordPage navigate={navigate} />;
       if (sub === 'notifications') return <AccountNotificationsPage navigate={navigate} />;
       return <AccountPage navigate={navigate} />;
     }
