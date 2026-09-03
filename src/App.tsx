@@ -62,7 +62,7 @@ export default function App() {
     if (top === 'account') {
       const sub = segments[1];
       if (sub === 'orders') return <AccountOrdersPage navigate={navigate} />;
-      if (sub === 'profile') return <AccountProfilePage navigate={navigate} />;
+      if (sub === 'profile') return <AccountProfilePage navigate={navigate} params={router.params} />;
       if (sub === 'notifications') return <AccountNotificationsPage navigate={navigate} />;
       return <AccountPage navigate={navigate} />;
     }

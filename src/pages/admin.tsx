@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut, Settings, User, Lock } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { formatKsh } from '@/lib/store-constants';
@@ -78,6 +84,21 @@ export function AdminPage({ navigate }: AdminPageProps) {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <span className="font-extrabold text-primary-foreground">SnC</span>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Settings">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/account/profile')}>
+                  <User className="mr-2 h-4 w-4" /> Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/account/profile?password=1')}>
+                  <Lock className="mr-2 h-4 w-4" /> Change Password
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div>
               <p className="font-bold leading-none">Step N Carry Admin</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>
@@ -85,7 +106,6 @@ export function AdminPage({ navigate }: AdminPageProps) {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate('/')}>View Store</Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/account/profile')}>Settings</Button>
             <Button variant="ghost" size="sm" onClick={() => signOut().then(() => navigate('/'))}>
               <LogOut className="mr-1 h-4 w-4" /> Sign Out
             </Button>

@@ -13,9 +13,10 @@ import { toast } from 'sonner';
 
 interface AccountProfilePageProps {
   navigate: (to: string) => void;
+  params?: Record<string, string>;
 }
 
-export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
+export function AccountProfilePage({ navigate, params }: AccountProfilePageProps) {
   const { user, profile, refreshProfile, loading: authLoading } = useAuth();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -31,6 +32,10 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
   useEffect(() => {
     if (!authLoading && !user) { navigate('/signin'); return; }
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (params?.password === '1') setChangingPassword(true);
+  }, [params]);
 
   useEffect(() => {
     if (profile) {
