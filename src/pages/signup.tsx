@@ -21,7 +21,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
 
   useEffect(() => {
     if (user) {
-      navigate(isAdmin ? '/admin' : '/account');
+      navigate(isAdmin ? '/admin' : '/');
     }
   }, [user, isAdmin, navigate]);
 

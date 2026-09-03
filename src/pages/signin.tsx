@@ -19,7 +19,7 @@ export function SignInPage({ navigate }: AuthPageProps) {
 
   useEffect(() => {
   if (!authLoading && user) {
-    navigate(isAdmin ? '/admin' : '/account');
+    navigate(isAdmin ? '/admin' : '/');
   }
 }, [user, isAdmin, authLoading, navigate]);
 
