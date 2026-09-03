@@ -85,6 +85,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate('/')}>View Store</Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/account/profile')}>Settings</Button>
             <Button variant="ghost" size="sm" onClick={() => signOut().then(() => navigate('/'))}>
               <LogOut className="mr-1 h-4 w-4" /> Sign Out
             </Button>
