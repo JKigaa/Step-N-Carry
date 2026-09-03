@@ -3,7 +3,7 @@ import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/sonner';
 import { useHashRouter } from '@/hooks/use-router';
-import { AuthProvider } from '@/hooks/use-auth';
+import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { CartProvider } from '@/hooks/use-cart';
 import { HomePage } from '@/pages/home';
 import { ShopPage } from '@/pages/shop';
@@ -15,6 +15,7 @@ import { OrderConfirmationPage } from '@/pages/order-confirmation';
 import { SignInPage } from '@/pages/signin';
 import { SignUpPage } from '@/pages/signup';
 import { ForgotPasswordPage } from '@/pages/forgot-password';
+import { ResetPasswordPage } from '@/pages/reset-password';
 import { AccountPage } from '@/pages/account';
 import { AccountOrdersPage } from '@/pages/account-orders';
 import { AccountProfilePage } from '@/pages/account-profile';
@@ -26,9 +27,10 @@ import { AdminProductsPage } from '@/pages/admin-products';
 import { AdminOrdersPage } from '@/pages/admin-orders';
 import { AdminOrderDetailPage } from '@/pages/admin-order-detail';
 
-export default function App() {
+function AppShell() {
   const router = useHashRouter();
   const { path, segments, navigate } = router;
+  const { isPasswordRecovery } = useAuth();
 
   useEffect(() => {
     const titles: Record<string, string> = {
@@ -49,6 +51,7 @@ export default function App() {
   const isAccountRoute = top === 'account';
 
   function renderPage() {
+    if (isPasswordRecovery) return <ResetPasswordPage navigate={navigate} />;
     if (top === '') return <HomePage navigate={navigate} />;
     if (top === 'shop') return <ShopPage navigate={navigate} params={router.params} />;
     if (top === 'product' && segments[1]) return <ProductDetailPage navigate={navigate} productId={segments[1]} />;
@@ -80,14 +83,20 @@ export default function App() {
   }
 
   return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar navigate={navigate} path={path} />
+      <main className="flex-1">{renderPage()}</main>
+      {!isAdminRoute && !isAccountRoute && <Footer navigate={navigate} />}
+      <Toaster richColors position="bottom-right" />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
     <AuthProvider>
       <CartProvider>
-        <div className="flex min-h-screen flex-col">
-          <Navbar navigate={navigate} path={path} />
-          <main className="flex-1">{renderPage()}</main>
-          {!isAdminRoute && !isAccountRoute && <Footer navigate={navigate} />}
-          <Toaster richColors position="bottom-right" />
-        </div>
+        <AppShell />
       </CartProvider>
     </AuthProvider>
   );
