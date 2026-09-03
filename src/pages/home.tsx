@@ -8,6 +8,12 @@ import { useCart } from '@/hooks/use-cart';
 import { toast } from 'sonner';
 import type { Product } from '@/types/db';
 
+const FALLBACK_HERO_IMAGES = [
+  { src: 'https://images.pexels.com/photos/1456733/pexels-photo-1456733.jpeg?auto=compress&cs=tinysrgb&h=650&w=940', alt: 'Sneakers' },
+  { src: 'https://images.pexels.com/photos/292999/pexels-photo-292999.jpeg?auto=compress&cs=tinysrgb&h=650&w=940', alt: 'Formal shoes' },
+  { src: 'https://images.pexels.com/photos/134064/pexels-photo-134064.jpeg?auto=compress&cs=tinysrgb&h=650&w=940', alt: 'Heels' },
+];
+
 interface HomePageProps {
   navigate: (to: string) => void;
 }
@@ -51,6 +57,14 @@ export function HomePage({ navigate }: HomePageProps) {
     toast.info('Select a size to add to cart');
   };
 
+  const heroImages = featured.length >= 3
+    ? [
+        { src: featured[0].images[0], alt: featured[0].name },
+        { src: featured[1].images[0], alt: featured[1].name },
+        { src: featured[2].images[0], alt: featured[2].name },
+      ]
+    : FALLBACK_HERO_IMAGES;
+
   return (
     <div>
       {/* Hero */}
@@ -84,19 +98,19 @@ export function HomePage({ navigate }: HomePageProps) {
           <div className="relative hidden lg:block">
             <div className="grid grid-cols-2 gap-4">
               <img
-                src="https://images.pexels.com/photos/1456733/pexels-photo-1456733.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
-                alt="Sneakers"
+                src={heroImages[0].src}
+                alt={heroImages[0].alt}
                 className="aspect-[3/4] w-full rounded-2xl object-cover shadow-lg"
               />
               <div className="flex flex-col gap-4">
                 <img
-                  src="https://images.pexels.com/photos/292999/pexels-photo-292999.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
-                  alt="Formal shoes"
+                  src={heroImages[1].src}
+                  alt={heroImages[1].alt}
                   className="aspect-square w-full rounded-2xl object-cover shadow-lg"
                 />
                 <img
-                  src="https://images.pexels.com/photos/134064/pexels-photo-134064.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
-                  alt="Heels"
+                  src={heroImages[2].src}
+                  alt={heroImages[2].alt}
                   className="aspect-square w-full rounded-2xl object-cover shadow-lg"
                 />
               </div>
