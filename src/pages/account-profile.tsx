@@ -24,7 +24,9 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
   const [town, setTown] = useState('');
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) { navigate('/signin'); return; }
@@ -61,13 +63,23 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+    if (!oldPassword) { toast.error('Enter your current password'); return; }
+    if (newPassword.length < 6) { toast.error('New password must be at least 6 characters'); return; }
+    if (newPassword !== confirmPassword) { toast.error('New password and confirmation do not match'); return; }
     setSaving(true);
     try {
+      const email = user?.email ?? profile?.email;
+      if (!email) throw new Error('Could not verify your account email');
+
+      const { error: verifyError } = await supabase.auth.signInWithPassword({ email, password: oldPassword });
+      if (verifyError) throw new Error('Current password is incorrect');
+
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       toast.success('Password updated');
+      setOldPassword('');
       setNewPassword('');
+      setConfirmPassword('');
       setChangingPassword(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to update password');
@@ -144,8 +156,16 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
         {changingPassword && (
           <form onSubmit={handlePasswordChange} className="mt-4 space-y-3">
             <div className="space-y-2">
+              <Label htmlFor="oldPassword">Current Password</Label>
+              <Input id="oldPassword" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Enter current password" required />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="newPassword">New Password</Label>
               <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" required minLength={6} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" required minLength={6} />
             </div>
             <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Update Password'}</Button>
           </form>
