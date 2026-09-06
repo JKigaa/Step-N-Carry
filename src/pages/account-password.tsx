@@ -58,6 +58,16 @@ export function AccountPasswordPage({ navigate }: AccountPasswordPageProps) {
       <h1 className="mb-6 text-3xl font-bold">Change Password</h1>
 
       <form onSubmit={handlePasswordChange} className="space-y-4 rounded-xl border border-border/60 bg-card p-5">
+        <input
+          type="text"
+          name="username"
+          autoComplete="username"
+          value={user?.email ?? profile?.email ?? ''}
+          readOnly
+          className="hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+        />
         <div className="space-y-2">
           <Label htmlFor="oldPassword">Current Password</Label>
           <Input id="oldPassword" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Enter current password" autoComplete="current-password" required />

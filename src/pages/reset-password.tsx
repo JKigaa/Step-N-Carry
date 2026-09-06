@@ -12,7 +12,7 @@ interface ResetPasswordPageProps {
 }
 
 export function ResetPasswordPage({ navigate }: ResetPasswordPageProps) {
-  const { clearPasswordRecovery, signOut } = useAuth();
+  const { user, profile, clearPasswordRecovery, signOut } = useAuth();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -45,6 +45,16 @@ export function ResetPasswordPage({ navigate }: ResetPasswordPageProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="username"
+            autoComplete="username"
+            value={user?.email ?? profile?.email ?? ''}
+            readOnly
+            className="hidden"
+            aria-hidden="true"
+            tabIndex={-1}
+          />
           <div className="space-y-2">
             <Label htmlFor="newPassword">New Password</Label>
             <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" autoComplete="new-password" required minLength={6} />
