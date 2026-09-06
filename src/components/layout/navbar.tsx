@@ -73,9 +73,7 @@ export function Navbar({ navigate, path }: NavbarProps) {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <button onClick={() => navigate('/')} className="flex shrink-0 items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-xl font-extrabold text-primary-foreground">SnC</span>
-          </div>
+          <img src="/logo-icon.png" alt="Step N Carry" className="h-9 w-auto rounded-lg" />
           <span className="hidden text-lg font-bold tracking-tight text-foreground sm:inline">
             Step N<span className="text-primary"> Carry</span>
           </span>

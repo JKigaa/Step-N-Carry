@@ -81,9 +81,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
       <div className="border-b border-border/60 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <span className="font-extrabold text-primary-foreground">SnC</span>
-            </div>
+            <img src="/logo-icon.png" alt="Step N Carry" className="h-9 w-auto rounded-lg" />
             <div>
               <p className="font-bold leading-none">Step N Carry Admin</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>

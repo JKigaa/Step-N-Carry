@@ -31,9 +31,7 @@ export function Footer({ navigate }: FooterProps) {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <span className="text-lg font-extrabold text-primary-foreground">SnC</span>
-              </div>
+              <img src="/logo-icon.png" alt="Step N Carry" className="h-9 w-auto rounded-lg" />
               <span className="text-lg font-bold">Step N<span className="text-primary"> Carry</span></span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
