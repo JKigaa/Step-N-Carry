@@ -60,15 +60,15 @@ export function AccountPasswordPage({ navigate }: AccountPasswordPageProps) {
       <form onSubmit={handlePasswordChange} className="space-y-4 rounded-xl border border-border/60 bg-card p-5">
         <div className="space-y-2">
           <Label htmlFor="oldPassword">Current Password</Label>
-          <Input id="oldPassword" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Enter current password" required />
+          <Input id="oldPassword" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Enter current password" autoComplete="current-password" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="newPassword">New Password</Label>
-          <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" required minLength={6} />
+          <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" autoComplete="new-password" required minLength={6} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirm New Password</Label>
-          <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" required minLength={6} />
+          <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" autoComplete="new-password" required minLength={6} />
         </div>
         <Button type="submit" size="lg" disabled={saving} className="w-full">
           <Lock className="mr-2 h-4 w-4" /> {saving ? 'Updating...' : 'Update Password'}

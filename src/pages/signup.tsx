@@ -84,6 +84,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="pl-9"
+                autoComplete="name"
                 required
               />
             </div>
@@ -100,6 +101,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="pl-9"
+                autoComplete="tel"
                 required
               />
             </div>
@@ -116,6 +118,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-9"
+                autoComplete="username"
                 required
               />
             </div>
@@ -132,6 +135,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-9"
+                autoComplete="new-password"
                 required
               />
             </div>

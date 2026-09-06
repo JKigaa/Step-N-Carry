@@ -47,11 +47,11 @@ export function ResetPasswordPage({ navigate }: ResetPasswordPageProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="newPassword">New Password</Label>
-            <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" required minLength={6} />
+            <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" autoComplete="new-password" required minLength={6} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm New Password</Label>
-            <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" required minLength={6} />
+            <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" autoComplete="new-password" required minLength={6} />
           </div>
           <Button type="submit" className="w-full" size="lg" disabled={saving}>
             <KeyRound className="mr-2 h-4 w-4" /> {saving ? 'Updating...' : 'Update Password'}
