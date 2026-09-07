@@ -65,9 +65,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
     <div className="mx-auto flex min-h-[70vh] max-w-md items-center px-4 py-8 sm:px-6">
       <div className="w-full">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <span className="text-xl font-extrabold text-primary-foreground">S</span>
-          </div>
+          <img src="/logo-icon.png" alt="Step N Carry" className="mx-auto mb-3 h-16 w-auto rounded-xl" />
           <h1 className="text-2xl font-bold">Create Account</h1>
           <p className="mt-1 text-sm text-muted-foreground">Join Step N Carry and start shopping</p>
         </div>
