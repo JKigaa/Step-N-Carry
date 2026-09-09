@@ -44,6 +44,13 @@ function formatKsh(amount: number): string {
   return new Intl.NumberFormat('en-KE').format(amount);
 }
 
+function formatPaymentMethod(method: string | null): string {
+  if (method === 'cod') return 'Pay on Delivery';
+  if (method === 'mpesa') return 'M-Pesa';
+  if (method === 'card') return 'Card Payment';
+  return 'Not specified';
+}
+
 Deno.serve(async (req) => {
   try {
     const payload: WebhookPayload = await req.json();
@@ -77,7 +84,7 @@ Deno.serve(async (req) => {
           { type: 'text', text: order.phone || 'N/A' },
           { type: 'text', text: itemsSummary },
           { type: 'text', text: formatKsh(order.total) },
-          { type: 'text', text: order.payment_method || 'N/A' },
+          { type: 'text', text: formatPaymentMethod(order.payment_method) },
           { type: 'text', text: deliveryLocation || 'N/A' },
         ],
       },
