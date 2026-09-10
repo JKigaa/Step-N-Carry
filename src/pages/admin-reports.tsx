@@ -3,9 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  ArrowLeft, TrendingUp, Download, FileText, Package, ShoppingBag, Users, DollarSign,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  ArrowLeft, TrendingUp, Download, FileText, FileSpreadsheet, ChevronDown, Package, ShoppingBag, Users, DollarSign,
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
+import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { formatKsh } from '@/lib/store-constants';
@@ -282,6 +289,16 @@ export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
     doc.save(filename);
   }
 
+  function handleExportExcel() {
+    const { headers, rows } = currentReportRows();
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    const tabLabel = REPORT_TABS.find((t) => t.key === reportType)?.label ?? 'Report';
+    XLSX.utils.book_append_sheet(workbook, worksheet, tabLabel.slice(0, 31));
+    const filename = `snc-${reportType}-report-${dateFrom}-to-${dateTo}.xlsx`;
+    XLSX.writeFile(workbook, filename);
+  }
+
   if (authLoading || !user || !isAdmin) return null;
 
   const isProductsTab = reportType === 'products';
@@ -336,12 +353,24 @@ export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
             <Button variant="outline" size="sm" onClick={() => { setDateFrom('2020-01-01'); setDateTo(toDateInputValue(new Date())); }}>All Time</Button>
           </div>
           <div className="ml-auto flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={tabLoading}>
-              <Download className="mr-1.5 h-4 w-4" /> Export CSV
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={tabLoading}>
-              <FileText className="mr-1.5 h-4 w-4" /> Export PDF
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={tabLoading}>
+                  <Download className="mr-1.5 h-4 w-4" /> Export <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportPdf}>
+                  <FileText className="mr-2 h-4 w-4" /> PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportExcel}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportCsv}>
+                  <FileText className="mr-2 h-4 w-4" /> CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
