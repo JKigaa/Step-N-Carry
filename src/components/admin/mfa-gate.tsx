@@ -137,6 +137,14 @@ function MfaEnrollScreen({
   useEffect(() => {
     (async () => {
       try {
+        // Clean up any abandoned unverified factor from a previous attempt
+        // (e.g. the user skipped or refreshed mid-setup) before starting fresh.
+        const { data: existing } = await supabase.auth.mfa.listFactors();
+        const stale = existing?.totp?.find((f) => f.status === 'unverified');
+        if (stale) {
+          await supabase.auth.mfa.unenroll({ factorId: stale.id });
+        }
+
         const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
         if (error) throw error;
         setQrCode(data.totp.qr_code);
