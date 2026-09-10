@@ -67,7 +67,7 @@ export function AdminTeamPage({ navigate }: AdminTeamPageProps) {
     const { data, error } = await supabase
       .from('profiles')
       .select('id, email, full_name, role')
-      .eq('email', searchEmail.trim().toLowerCase())
+      .ilike('email', searchEmail.trim())
       .maybeSingle();
     setSearching(false);
     if (error) {
