@@ -102,6 +102,10 @@ export function AdminTeamPage({ navigate }: AdminTeamPageProps) {
   const superAdminCount = admins.filter((a) => a.is_super_admin).length;
 
   const handleRemove = async (admin: AdminProfile) => {
+    if (admin.id === user?.id) {
+      toast.error("You can't remove yourself. Ask another super admin to do it if needed.");
+      return;
+    }
     if (admin.is_super_admin && superAdminCount <= 1) {
       toast.error("Can't remove the last super admin \u2014 promote another admin to super admin first.");
       return;
@@ -219,7 +223,13 @@ export function AdminTeamPage({ navigate }: AdminTeamPageProps) {
                       {admin.is_super_admin ? 'Super Admin' : 'Assistant Admin'}
                     </span>
                     {!admin.is_super_admin && (
-                      <Button variant="outline" size="sm" onClick={() => handleRemove(admin)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemove(admin)}
+                        disabled={admin.id === user?.id}
+                        title={admin.id === user?.id ? "You can't remove yourself" : undefined}
+                      >
                         <UserMinus className="mr-1.5 h-4 w-4" /> Remove
                       </Button>
                     )}
@@ -228,8 +238,14 @@ export function AdminTeamPage({ navigate }: AdminTeamPageProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => handleRemove(admin)}
-                        disabled={superAdminCount <= 1}
-                        title={superAdminCount <= 1 ? "Can't remove the last super admin" : undefined}
+                        disabled={admin.id === user?.id || superAdminCount <= 1}
+                        title={
+                          admin.id === user?.id
+                            ? "You can't remove yourself"
+                            : superAdminCount <= 1
+                            ? "Can't remove the last super admin"
+                            : undefined
+                        }
                       >
                         <UserMinus className="mr-1.5 h-4 w-4" /> Remove
                       </Button>
