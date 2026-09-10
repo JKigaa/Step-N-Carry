@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Search, Edit2, Trash2, Star, TrendingUp, Package } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Edit2, Trash2, Star, TrendingUp, Package, CheckCircle2, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { formatKsh, SHOE_CATEGORIES } from '@/lib/store-constants';
@@ -31,10 +31,12 @@ const EMPTY_FORM = {
 type ProductForm = typeof EMPTY_FORM;
 
 export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<ProductWithSizes[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'deletion_requests'>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [sizes, setSizes] = useState<{ size: string; stock: string }[]>([
@@ -118,7 +120,14 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
         if (error) throw error;
       }
 
-      toast.success(editProduct ? 'Product updated' : 'Product added');
+      const isNewProductByAssistant = !editProduct && !isSuperAdmin;
+      toast.success(
+        editProduct
+          ? 'Product updated'
+          : isNewProductByAssistant
+          ? 'Product submitted — awaiting super admin approval before it goes live'
+          : 'Product added'
+      );
       setDialogOpen(false);
       await loadProducts();
     } catch (err) {
@@ -129,11 +138,93 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    if (isSuperAdmin) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) { toast.error('Failed to delete'); return; }
+      toast.success('Product deleted');
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      if (!confirm('Request deletion of this product? It will stay live until a super admin approves the request.')) return;
+      const { error } = await supabase.from('products').update({ pending_deletion: true }).eq('id', id);
+      if (error) { toast.error('Failed to request deletion'); return; }
+      toast.success('Deletion requested — awaiting super admin approval');
+      setProducts((prev) => prev.map((p) => p.id === id ? { ...p, pending_deletion: true } : p));
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    const { error } = await supabase.from('products').update({ approval_status: 'approved' }).eq('id', id);
+    if (error) { toast.error('Failed to approve'); return; }
+    toast.success('Product approved and now visible to customers');
+    setProducts((prev) => prev.map((p) => p.id === id ? { ...p, approval_status: 'approved' } : p));
+  };
+
+  const handleReject = async (id: string) => {
+    const { error } = await supabase.from('products').update({ approval_status: 'rejected' }).eq('id', id);
+    if (error) { toast.error('Failed to reject'); return; }
+    toast.success('Product rejected');
+    setProducts((prev) => prev.map((p) => p.id === id ? { ...p, approval_status: 'rejected' } : p));
+  };
+
+  const handleApproveDeletion = async (id: string) => {
+    if (!confirm('Permanently delete this product?')) return;
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) { toast.error('Failed to delete'); return; }
     toast.success('Product deleted');
     setProducts((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleCancelDeletion = async (id: string) => {
+    const { error } = await supabase.from('products').update({ pending_deletion: false }).eq('id', id);
+    if (error) { toast.error('Failed to cancel deletion request'); return; }
+    toast.success('Deletion request cancelled — product stays live');
+    setProducts((prev) => prev.map((p) => p.id === id ? { ...p, pending_deletion: false } : p));
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkApprove = async () => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('products').update({ approval_status: 'approved' }).in('id', ids);
+    if (error) { toast.error('Failed to approve selected products'); return; }
+    toast.success(`${ids.length} product${ids.length === 1 ? '' : 's'} approved`);
+    setProducts((prev) => prev.map((p) => ids.includes(p.id) ? { ...p, approval_status: 'approved' } : p));
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkReject = async () => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('products').update({ approval_status: 'rejected' }).in('id', ids);
+    if (error) { toast.error('Failed to reject selected products'); return; }
+    toast.success(`${ids.length} product${ids.length === 1 ? '' : 's'} rejected`);
+    setProducts((prev) => prev.map((p) => ids.includes(p.id) ? { ...p, approval_status: 'rejected' } : p));
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkApproveDeletion = async () => {
+    const ids = Array.from(selectedIds);
+    if (!confirm(`Permanently delete ${ids.length} product${ids.length === 1 ? '' : 's'}?`)) return;
+    const { error } = await supabase.from('products').delete().in('id', ids);
+    if (error) { toast.error('Failed to delete selected products'); return; }
+    toast.success(`${ids.length} product${ids.length === 1 ? '' : 's'} deleted`);
+    setProducts((prev) => prev.filter((p) => !ids.includes(p.id)));
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkCancelDeletion = async () => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('products').update({ pending_deletion: false }).in('id', ids);
+    if (error) { toast.error('Failed to cancel deletion requests'); return; }
+    toast.success(`${ids.length} deletion request${ids.length === 1 ? '' : 's'} cancelled`);
+    setProducts((prev) => prev.map((p) => ids.includes(p.id) ? { ...p, pending_deletion: false } : p));
+    setSelectedIds(new Set());
   };
 
   const toggleAvailability = async (id: string, current: boolean) => {
@@ -141,9 +232,17 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
     setProducts((prev) => prev.map((p) => p.id === id ? { ...p, is_available: !current } : p));
   };
 
-  const filtered = products.filter((p) =>
-    !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = products.filter((p) => {
+    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.brand.toLowerCase().includes(search.toLowerCase());
+    const matchStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'pending' && p.approval_status === 'pending') ||
+      (statusFilter === 'deletion_requests' && p.pending_deletion);
+    return matchSearch && matchStatus;
+  });
+
+  const pendingCount = products.filter((p) => p.approval_status === 'pending').length;
+  const deletionRequestCount = products.filter((p) => p.pending_deletion).length;
 
   if (authLoading || !user || !isAdmin) return null;
 
@@ -166,6 +265,38 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {/* Status filter tabs */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          <Button size="sm" variant={statusFilter === 'all' ? 'default' : 'outline'} onClick={() => { setStatusFilter('all'); setSelectedIds(new Set()); }}>
+            All ({products.length})
+          </Button>
+          <Button size="sm" variant={statusFilter === 'pending' ? 'default' : 'outline'} onClick={() => { setStatusFilter('pending'); setSelectedIds(new Set()); }}>
+            Pending Approval ({pendingCount})
+          </Button>
+          <Button size="sm" variant={statusFilter === 'deletion_requests' ? 'default' : 'outline'} onClick={() => { setStatusFilter('deletion_requests'); setSelectedIds(new Set()); }}>
+            Deletion Requests ({deletionRequestCount})
+          </Button>
+        </div>
+
+        {/* Bulk action bar - super admin only, only meaningful in the two review tabs */}
+        {isSuperAdmin && statusFilter !== 'all' && selectedIds.size > 0 && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+            <span className="text-sm font-medium">{selectedIds.size} selected</span>
+            {statusFilter === 'pending' ? (
+              <>
+                <Button size="sm" onClick={handleBulkApprove}><CheckCircle2 className="mr-1.5 h-4 w-4" /> Approve Selected</Button>
+                <Button size="sm" variant="outline" onClick={handleBulkReject}><XCircle className="mr-1.5 h-4 w-4" /> Reject Selected</Button>
+              </>
+            ) : (
+              <>
+                <Button size="sm" variant="destructive" onClick={handleBulkApproveDeletion}><Trash2 className="mr-1.5 h-4 w-4" /> Approve Deletion</Button>
+                <Button size="sm" variant="outline" onClick={handleBulkCancelDeletion}><XCircle className="mr-1.5 h-4 w-4" /> Cancel Requests</Button>
+              </>
+            )}
+            <button onClick={() => setSelectedIds(new Set())} className="ml-auto text-xs text-muted-foreground hover:text-foreground">Clear selection</button>
+          </div>
+        )}
+
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-40 animate-pulse rounded-xl bg-muted" />)}
@@ -173,12 +304,20 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((p) => (
-              <div key={p.id} className="rounded-xl border border-border/60 bg-card overflow-hidden">
+              <div key={p.id} className={`rounded-xl border overflow-hidden ${p.approval_status === 'pending' ? 'border-amber-300 bg-amber-50/30' : p.pending_deletion ? 'border-red-300 bg-red-50/30' : 'border-border/60 bg-card'}`}>
                 <div className="relative h-48">
                   <img src={p.images[0] ?? ''} alt={p.name} className="h-full w-full object-cover" />
-                  <div className="absolute right-2 top-2 flex gap-1">
+                  {isSuperAdmin && statusFilter !== 'all' && (
+                    <label className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded bg-white/90 shadow">
+                      <input type="checkbox" checked={selectedIds.has(p.id)} onChange={() => toggleSelect(p.id)} className="h-4 w-4" />
+                    </label>
+                  )}
+                  <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
                     {p.is_featured && <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">Featured</span>}
                     {p.is_popular && <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">Popular</span>}
+                    {p.approval_status === 'pending' && <span className="flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white"><Clock className="h-2.5 w-2.5" /> Pending Approval</span>}
+                    {p.approval_status === 'rejected' && <span className="flex items-center gap-1 rounded-full bg-gray-500 px-2 py-0.5 text-[10px] font-bold text-white"><XCircle className="h-2.5 w-2.5" /> Rejected</span>}
+                    {p.pending_deletion && <span className="flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white"><AlertTriangle className="h-2.5 w-2.5" /> Deletion Requested</span>}
                   </div>
                 </div>
                 <div className="p-4">
@@ -211,6 +350,26 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
                       </Button>
                     </div>
                   </div>
+                  {isSuperAdmin && p.approval_status === 'pending' && (
+                    <div className="mt-3 flex gap-2 border-t border-amber-200 pt-3">
+                      <Button size="sm" className="flex-1" onClick={() => handleApprove(p.id)}>
+                        <CheckCircle2 className="mr-1.5 h-4 w-4" /> Approve
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => handleReject(p.id)}>
+                        <XCircle className="mr-1.5 h-4 w-4" /> Reject
+                      </Button>
+                    </div>
+                  )}
+                  {isSuperAdmin && p.pending_deletion && (
+                    <div className="mt-3 flex gap-2 border-t border-red-200 pt-3">
+                      <Button size="sm" variant="destructive" className="flex-1" onClick={() => handleApproveDeletion(p.id)}>
+                        <Trash2 className="mr-1.5 h-4 w-4" /> Approve Deletion
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => handleCancelDeletion(p.id)}>
+                        <XCircle className="mr-1.5 h-4 w-4" /> Cancel Request
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

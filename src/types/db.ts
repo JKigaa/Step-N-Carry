@@ -25,6 +25,10 @@ export interface Product {
   is_available: boolean;
   is_featured: boolean;
   is_popular: boolean;
+  approval_status: 'pending' | 'approved' | 'rejected';
+  pending_deletion: boolean;
+  submitted_by: string | null;
+  deletion_requested_by: string | null;
   created_at: string;
   updated_at: string;
 }
