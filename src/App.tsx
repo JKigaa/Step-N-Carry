@@ -29,6 +29,7 @@ import { AdminOrderDetailPage } from '@/pages/admin-order-detail';
 import { AdminReportsPage } from '@/pages/admin-reports';
 import { AdminTeamPage } from '@/pages/admin-team';
 import { AdminMfaGate } from '@/components/admin/mfa-gate';
+import { AdminUsersPage } from '@/pages/admin-users';
 
 function AppShell() {
   const router = useHashRouter();
@@ -83,6 +84,7 @@ function AppShell() {
       else if (sub === 'orders') adminContent = <AdminOrdersPage navigate={navigate} />;
       else if (sub === 'reports') adminContent = <AdminReportsPage navigate={navigate} />;
       else if (sub === 'team') adminContent = <AdminTeamPage navigate={navigate} />;
+      else if (sub === 'users') adminContent = <AdminUsersPage navigate={navigate} />;
       else adminContent = <AdminPage navigate={navigate} />;
       return <AdminMfaGate>{adminContent}</AdminMfaGate>;
     }

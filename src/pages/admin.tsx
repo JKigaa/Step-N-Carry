@@ -152,7 +152,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
         </div>
 
         {/* Quick actions */}
-        <div className={`grid gap-4 sm:grid-cols-2 ${isSuperAdmin ? 'lg:grid-cols-4' : ''}`}>
+        <div className={`grid gap-4 sm:grid-cols-2 ${isSuperAdmin ? 'lg:grid-cols-5' : ''}`}>
           <button
             onClick={() => navigate('/admin/orders')}
             className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
@@ -202,6 +202,20 @@ export function AdminPage({ navigate }: AdminPageProps) {
               <div>
                 <h3 className="text-lg font-bold">Manage Admins</h3>
                 <p className="text-sm text-muted-foreground">Add or remove assistant admins</p>
+              </div>
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigate('/admin/users')}
+              className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+                <Users className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Users</h3>
+                <p className="text-sm text-muted-foreground">See who's active and who isn't</p>
               </div>
             </button>
           )}
