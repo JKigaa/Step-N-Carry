@@ -10,12 +10,12 @@ import { Switch } from '@/components/ui/switch';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Search, Edit2, Trash2, Star, TrendingUp, Package, CheckCircle2, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Edit2, Trash2, Star, TrendingUp, Package, CheckCircle2, XCircle, Clock, AlertTriangle, FileEdit } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { formatKsh, SHOE_CATEGORIES } from '@/lib/store-constants';
 import { toast } from 'sonner';
-import type { Product, ProductSize } from '@/types/db';
+import type { Product, ProductSize, ProductEditRequest } from '@/types/db';
 
 interface AdminProductsPageProps {
   navigate: (to: string) => void;
@@ -35,8 +35,9 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
   const [products, setProducts] = useState<ProductWithSizes[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'deletion_requests'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'pending_edits' | 'deletion_requests'>('all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [editRequests, setEditRequests] = useState<ProductEditRequest[]>([]);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [sizes, setSizes] = useState<{ size: string; stock: string }[]>([
@@ -61,7 +62,17 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
     setLoading(false);
   };
 
-  useEffect(() => { if (isAdmin) loadProducts(); }, [isAdmin]);
+  const loadEditRequests = async () => {
+    const { data, error } = await supabase
+      .from('product_edit_requests')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+    if (error) { console.error('LOAD EDIT REQUESTS ERROR:', error); return; }
+    setEditRequests((data ?? []) as ProductEditRequest[]);
+  };
+
+  useEffect(() => { if (isAdmin) { loadProducts(); loadEditRequests(); } }, [isAdmin]);
 
   const openAdd = () => {
     setEditProduct(null);
@@ -96,13 +107,30 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
         description: form.description, price, images,
         stock: parseInt(form.stock) || 0,
         is_available: form.is_available, is_featured: form.is_featured, is_popular: form.is_popular,
-        updated_at: new Date().toISOString(),
       };
+      const sizeRows = sizes.filter((s) => s.size).map((s) => ({ size: s.size, stock: parseInt(s.stock) || 0 }));
+
+      if (editProduct && !isSuperAdmin) {
+        // Assistant admin editing an existing, already-live product: stage the
+        // change for review instead of touching the live product at all.
+        const { error } = await supabase.from('product_edit_requests').insert({
+          product_id: editProduct.id,
+          proposed_data: productData,
+          proposed_sizes: sizeRows,
+        });
+        if (error) throw error;
+        toast.success('Edit submitted for review — the live product is unchanged until a super admin approves it');
+        setDialogOpen(false);
+        await loadEditRequests();
+        setSaving(false);
+        return;
+      }
 
       let productId = editProduct?.id;
 
       if (editProduct) {
-        const { error } = await supabase.from('products').update(productData).eq('id', editProduct.id);
+        // Super admin editing directly: applies immediately, as before.
+        const { error } = await supabase.from('products').update({ ...productData, updated_at: new Date().toISOString() }).eq('id', editProduct.id);
         if (error) throw error;
         await supabase.from('product_sizes').delete().eq('product_id', editProduct.id);
       } else {
@@ -111,12 +139,8 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
         productId = data.id;
       }
 
-      // Insert sizes
-      const sizeRows = sizes.filter((s) => s.size).map((s) => ({
-        product_id: productId!, size: s.size, stock: parseInt(s.stock) || 0,
-      }));
       if (sizeRows.length > 0) {
-        const { error } = await supabase.from('product_sizes').insert(sizeRows);
+        const { error } = await supabase.from('product_sizes').insert(sizeRows.map((s) => ({ ...s, product_id: productId! })));
         if (error) throw error;
       }
 
@@ -227,6 +251,42 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
     setSelectedIds(new Set());
   };
 
+  const handleApproveEdit = async (id: string) => {
+    const { error } = await supabase.rpc('approve_product_edit_request', { request_id: id });
+    if (error) { toast.error(error.message || 'Failed to approve edit'); return; }
+    toast.success('Edit approved and applied');
+    setEditRequests((prev) => prev.filter((r) => r.id !== id));
+    await loadProducts();
+  };
+
+  const handleRejectEdit = async (id: string) => {
+    const { error } = await supabase.rpc('reject_product_edit_request', { request_id: id });
+    if (error) { toast.error(error.message || 'Failed to reject edit'); return; }
+    toast.success('Edit rejected');
+    setEditRequests((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const handleBulkApproveEdits = async () => {
+    const ids = Array.from(selectedIds);
+    const results = await Promise.all(ids.map((id) => supabase.rpc('approve_product_edit_request', { request_id: id })));
+    const failed = results.filter((r) => r.error).length;
+    if (failed > 0) toast.error(`${failed} edit${failed === 1 ? '' : 's'} failed to approve`);
+    toast.success(`${ids.length - failed} edit${ids.length - failed === 1 ? '' : 's'} approved`);
+    setEditRequests((prev) => prev.filter((r) => !ids.includes(r.id)));
+    setSelectedIds(new Set());
+    await loadProducts();
+  };
+
+  const handleBulkRejectEdits = async () => {
+    const ids = Array.from(selectedIds);
+    const results = await Promise.all(ids.map((id) => supabase.rpc('reject_product_edit_request', { request_id: id })));
+    const failed = results.filter((r) => r.error).length;
+    if (failed > 0) toast.error(`${failed} edit${failed === 1 ? '' : 's'} failed to reject`);
+    toast.success(`${ids.length - failed} edit${ids.length - failed === 1 ? '' : 's'} rejected`);
+    setEditRequests((prev) => prev.filter((r) => !ids.includes(r.id)));
+    setSelectedIds(new Set());
+  };
+
   const toggleAvailability = async (id: string, current: boolean) => {
     await supabase.from('products').update({ is_available: !current }).eq('id', id);
     setProducts((prev) => prev.map((p) => p.id === id ? { ...p, is_available: !current } : p));
@@ -273,21 +333,31 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
           <Button size="sm" variant={statusFilter === 'pending' ? 'default' : 'outline'} onClick={() => { setStatusFilter('pending'); setSelectedIds(new Set()); }}>
             Pending Approval ({pendingCount})
           </Button>
+          <Button size="sm" variant={statusFilter === 'pending_edits' ? 'default' : 'outline'} onClick={() => { setStatusFilter('pending_edits'); setSelectedIds(new Set()); }}>
+            Pending Edits ({editRequests.length})
+          </Button>
           <Button size="sm" variant={statusFilter === 'deletion_requests' ? 'default' : 'outline'} onClick={() => { setStatusFilter('deletion_requests'); setSelectedIds(new Set()); }}>
             Deletion Requests ({deletionRequestCount})
           </Button>
         </div>
 
-        {/* Bulk action bar - super admin only, only meaningful in the two review tabs */}
+        {/* Bulk action bar - super admin only, only meaningful in the review tabs */}
         {isSuperAdmin && statusFilter !== 'all' && selectedIds.size > 0 && (
           <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
             <span className="text-sm font-medium">{selectedIds.size} selected</span>
-            {statusFilter === 'pending' ? (
+            {statusFilter === 'pending' && (
               <>
                 <Button size="sm" onClick={handleBulkApprove}><CheckCircle2 className="mr-1.5 h-4 w-4" /> Approve Selected</Button>
                 <Button size="sm" variant="outline" onClick={handleBulkReject}><XCircle className="mr-1.5 h-4 w-4" /> Reject Selected</Button>
               </>
-            ) : (
+            )}
+            {statusFilter === 'pending_edits' && (
+              <>
+                <Button size="sm" onClick={handleBulkApproveEdits}><CheckCircle2 className="mr-1.5 h-4 w-4" /> Approve Selected</Button>
+                <Button size="sm" variant="outline" onClick={handleBulkRejectEdits}><XCircle className="mr-1.5 h-4 w-4" /> Reject Selected</Button>
+              </>
+            )}
+            {statusFilter === 'deletion_requests' && (
               <>
                 <Button size="sm" variant="destructive" onClick={handleBulkApproveDeletion}><Trash2 className="mr-1.5 h-4 w-4" /> Approve Deletion</Button>
                 <Button size="sm" variant="outline" onClick={handleBulkCancelDeletion}><XCircle className="mr-1.5 h-4 w-4" /> Cancel Requests</Button>
@@ -297,7 +367,59 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
           </div>
         )}
 
-        {loading ? (
+        {statusFilter === 'pending_edits' ? (
+          <div className="space-y-3">
+            {editRequests.length === 0 ? (
+              <p className="py-12 text-center text-muted-foreground">No pending edits.</p>
+            ) : (
+              editRequests.map((req) => {
+                const product = products.find((p) => p.id === req.product_id);
+                const proposed = req.proposed_data as Record<string, unknown>;
+                const changedFields = product
+                  ? Object.entries(proposed).filter(([key, value]) => {
+                      if (key === 'images') return JSON.stringify(value) !== JSON.stringify(product.images);
+                      return String((product as any)[key]) !== String(value);
+                    })
+                  : Object.entries(proposed);
+                return (
+                  <div key={req.id} className="rounded-xl border border-amber-300 bg-amber-50/30 p-4">
+                    <div className="mb-3 flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {isSuperAdmin && (
+                          <input type="checkbox" checked={selectedIds.has(req.id)} onChange={() => toggleSelect(req.id)} className="h-4 w-4" />
+                        )}
+                        <div>
+                          <p className="font-semibold">{product?.name ?? 'Unknown product'}</p>
+                          <p className="text-xs text-muted-foreground">Submitted {new Date(req.created_at).toLocaleString('en-KE')}</p>
+                        </div>
+                      </div>
+                      {isSuperAdmin && (
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => handleApproveEdit(req.id)}><CheckCircle2 className="mr-1.5 h-4 w-4" /> Approve</Button>
+                          <Button size="sm" variant="outline" onClick={() => handleRejectEdit(req.id)}><XCircle className="mr-1.5 h-4 w-4" /> Reject</Button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      {changedFields.length === 0 ? (
+                        <p className="text-muted-foreground">No field changes detected (sizes/stock may have changed).</p>
+                      ) : (
+                        changedFields.map(([key, value]) => (
+                          <div key={key} className="flex flex-wrap items-baseline gap-2">
+                            <span className="font-medium capitalize">{key.replace('_', ' ')}:</span>
+                            <span className="text-red-600 line-through">{product ? String((product as any)[key]) : ''}</span>
+                            <span>→</span>
+                            <span className="text-green-700">{Array.isArray(value) ? value.join(', ') : String(value)}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-40 animate-pulse rounded-xl bg-muted" />)}
           </div>
@@ -383,6 +505,13 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
           <DialogHeader>
             <DialogTitle>{editProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
           </DialogHeader>
+          {!isSuperAdmin && (
+            <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+              {editProduct
+                ? 'This edit will be sent to a super admin for review. The live product stays unchanged until approved.'
+                : 'This product will need super admin approval before it appears in the shop.'}
+            </p>
+          )}
           <div className="space-y-4 pt-2">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

@@ -108,3 +108,16 @@ export interface Notification {
 export interface ProductWithSizes extends Product {
   sizes: ProductSize[];
 }
+
+export interface ProductEditRequest {
+  id: string;
+  product_id: string;
+  submitted_by: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  proposed_data: Record<string, unknown>;
+  proposed_sizes: { size: string; stock: number }[] | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
