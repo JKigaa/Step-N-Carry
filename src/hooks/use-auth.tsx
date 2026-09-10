@@ -58,13 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event === 'PASSWORD_RECOVERY') setIsPasswordRecovery(true);
       setSession(sess);
       if (sess?.user) {
-        (async () => {
-          await fetchProfile(sess.user.id);
-        })();
+        fetchProfile(sess.user.id).finally(() => setLoading(false));
       } else {
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
