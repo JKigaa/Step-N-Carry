@@ -85,7 +85,7 @@ function downloadBlob(content: BlobPart, filename: string, type: string) {
 }
 
 export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
 
   const today = new Date();
   const [dateFrom, setDateFrom] = useState(toDateInputValue(firstOfMonth(today)));
@@ -97,12 +97,14 @@ export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
   const [monthlyTotal, setMonthlyTotal] = useState(0);
 
   useEffect(() => {
-    if (!authLoading && (!user || !isAdmin)) { navigate('/signin'); return; }
-  }, [user, isAdmin, authLoading, navigate]);
+    if (authLoading) return;
+    if (!user || !isAdmin) { navigate('/signin'); return; }
+    if (!isSuperAdmin) { navigate('/admin'); return; }
+  }, [user, isAdmin, isSuperAdmin, authLoading, navigate]);
 
   // Monthly sales total — always this calendar month, independent of the filters below
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isSuperAdmin) return;
     (async () => {
       const monthStart = firstOfMonth(new Date()).toISOString();
       const { data } = await supabase
@@ -114,11 +116,11 @@ export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
         .reduce((sum, o) => sum + o.total, 0);
       setMonthlyTotal(total);
     })();
-  }, [isAdmin]);
+  }, [isSuperAdmin]);
 
   // Orders within the selected date range (source data for all four report types)
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isSuperAdmin) return;
     let mounted = true;
     (async () => {
       setLoading(true);
@@ -137,14 +139,14 @@ export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
       }
     })();
     return () => { mounted = false; };
-  }, [isAdmin, dateFrom, dateTo]);
+  }, [isSuperAdmin, dateFrom, dateTo]);
 
   // Product performance — separate query, only needed for that tab
   const [productRows, setProductRows] = useState<ProductRow[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
 
   useEffect(() => {
-    if (!isAdmin || reportType !== 'products') return;
+    if (!isSuperAdmin || reportType !== 'products') return;
     let mounted = true;
     (async () => {
       setProductsLoading(true);
@@ -172,7 +174,7 @@ export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
       }
     })();
     return () => { mounted = false; };
-  }, [isAdmin, reportType, dateFrom, dateTo]);
+  }, [isSuperAdmin, reportType, dateFrom, dateTo]);
 
   const nonCancelledOrders = useMemo(() => orders.filter((o) => o.status !== 'Cancelled'), [orders]);
 
@@ -299,7 +301,7 @@ export function AdminReportsPage({ navigate }: AdminReportsPageProps) {
     XLSX.writeFile(workbook, filename);
   }
 
-  if (authLoading || !user || !isAdmin) return null;
+  if (authLoading || !user || !isSuperAdmin) return null;
 
   const isProductsTab = reportType === 'products';
   const tabLoading = isProductsTab ? productsLoading : loading;

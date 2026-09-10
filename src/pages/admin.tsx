@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut, Settings, User, Lock, FileBarChart } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut, Settings, User, Lock, FileBarChart, UserCog } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +24,7 @@ interface DashboardStats {
 }
 
 export function AdminPage({ navigate }: AdminPageProps) {
-  const { user, profile, isAdmin, loading: authLoading, signOut } = useAuth();
+  const { user, profile, isAdmin, isSuperAdmin, loading: authLoading, signOut } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -152,7 +152,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
         </div>
 
         {/* Quick actions */}
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className={`grid gap-4 sm:grid-cols-2 ${isSuperAdmin ? 'lg:grid-cols-4' : ''}`}>
           <button
             onClick={() => navigate('/admin/orders')}
             className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
@@ -177,18 +177,34 @@ export function AdminPage({ navigate }: AdminPageProps) {
               <p className="text-sm text-muted-foreground">Add, edit, and manage your shoe inventory</p>
             </div>
           </button>
-          <button
-            onClick={() => navigate('/admin/reports')}
-            className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
-              <FileBarChart className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold">Reports</h3>
-              <p className="text-sm text-muted-foreground">Sales, orders, product, and customer reports</p>
-            </div>
-          </button>
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigate('/admin/reports')}
+              className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+                <FileBarChart className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Reports</h3>
+                <p className="text-sm text-muted-foreground">Sales, orders, product, and customer reports</p>
+              </div>
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigate('/admin/team')}
+              className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+                <UserCog className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Manage Admins</h3>
+                <p className="text-sm text-muted-foreground">Add or remove assistant admins</p>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>

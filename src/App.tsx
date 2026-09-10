@@ -27,6 +27,7 @@ import { AdminProductsPage } from '@/pages/admin-products';
 import { AdminOrdersPage } from '@/pages/admin-orders';
 import { AdminOrderDetailPage } from '@/pages/admin-order-detail';
 import { AdminReportsPage } from '@/pages/admin-reports';
+import { AdminTeamPage } from '@/pages/admin-team';
 
 function AppShell() {
   const router = useHashRouter();
@@ -79,6 +80,7 @@ function AppShell() {
       if (sub === 'orders' && sub2) return <AdminOrderDetailPage navigate={navigate} orderId={sub2} />;
       if (sub === 'orders') return <AdminOrdersPage navigate={navigate} />;
       if (sub === 'reports') return <AdminReportsPage navigate={navigate} />;
+      if (sub === 'team') return <AdminTeamPage navigate={navigate} />;
       return <AdminPage navigate={navigate} />;
     }
     return <HomePage navigate={navigate} />;

@@ -4,6 +4,7 @@ export interface Profile {
   full_name: string;
   phone: string;
   role: 'customer' | 'admin';
+  is_super_admin: boolean;
   delivery_address: string;
   county: string;
   town: string;
