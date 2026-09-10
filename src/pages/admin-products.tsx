@@ -400,18 +400,48 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
                         </div>
                       )}
                     </div>
-                    <div className="space-y-1 text-sm">
+                    <div className="space-y-3 text-sm">
                       {changedFields.length === 0 ? (
                         <p className="text-muted-foreground">No field changes detected (sizes/stock may have changed).</p>
                       ) : (
-                        changedFields.map(([key, value]) => (
-                          <div key={key} className="flex flex-wrap items-baseline gap-2">
-                            <span className="font-medium capitalize">{key.replace('_', ' ')}:</span>
-                            <span className="text-red-600 line-through">{product ? String((product as any)[key]) : ''}</span>
-                            <span>→</span>
-                            <span className="text-green-700">{Array.isArray(value) ? value.join(', ') : String(value)}</span>
-                          </div>
-                        ))
+                        changedFields.map(([key, value]) => {
+                          if (key === 'images') {
+                            const currentImages = product?.images ?? [];
+                            const proposedImages = Array.isArray(value) ? (value as string[]) : [];
+                            return (
+                              <div key={key}>
+                                <span className="font-medium">Images:</span>
+                                <div className="mt-1 flex flex-wrap items-center gap-3">
+                                  <div>
+                                    <p className="mb-1 text-xs text-muted-foreground">Current</p>
+                                    <div className="flex gap-1">
+                                      {currentImages.slice(0, 4).map((url, i) => (
+                                        <img key={i} src={url} alt="" className="h-14 w-14 rounded border border-red-300 object-cover" />
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <span>→</span>
+                                  <div>
+                                    <p className="mb-1 text-xs text-muted-foreground">Proposed</p>
+                                    <div className="flex gap-1">
+                                      {proposedImages.slice(0, 4).map((url, i) => (
+                                        <img key={i} src={url} alt="" className="h-14 w-14 rounded border border-green-400 object-cover" />
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return (
+                            <div key={key} className="flex flex-wrap items-baseline gap-2">
+                              <span className="font-medium capitalize">{key.replace('_', ' ')}:</span>
+                              <span className="text-red-600 line-through">{product ? String((product as any)[key]) : ''}</span>
+                              <span>→</span>
+                              <span className="text-green-700">{String(value)}</span>
+                            </div>
+                          );
+                        })
                       )}
                     </div>
                   </div>
