@@ -5,6 +5,7 @@ export interface Profile {
   phone: string;
   role: 'customer' | 'admin';
   is_super_admin: boolean;
+  mfa_skip_count: number;
   delivery_address: string;
   county: string;
   town: string;

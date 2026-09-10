@@ -28,6 +28,7 @@ import { AdminOrdersPage } from '@/pages/admin-orders';
 import { AdminOrderDetailPage } from '@/pages/admin-order-detail';
 import { AdminReportsPage } from '@/pages/admin-reports';
 import { AdminTeamPage } from '@/pages/admin-team';
+import { AdminMfaGate } from '@/components/admin/mfa-gate';
 
 function AppShell() {
   const router = useHashRouter();
@@ -76,12 +77,14 @@ function AppShell() {
     if (top === 'admin') {
       const sub = segments[1];
       const sub2 = segments[2];
-      if (sub === 'products') return <AdminProductsPage navigate={navigate} />;
-      if (sub === 'orders' && sub2) return <AdminOrderDetailPage navigate={navigate} orderId={sub2} />;
-      if (sub === 'orders') return <AdminOrdersPage navigate={navigate} />;
-      if (sub === 'reports') return <AdminReportsPage navigate={navigate} />;
-      if (sub === 'team') return <AdminTeamPage navigate={navigate} />;
-      return <AdminPage navigate={navigate} />;
+      let adminContent;
+      if (sub === 'products') adminContent = <AdminProductsPage navigate={navigate} />;
+      else if (sub === 'orders' && sub2) adminContent = <AdminOrderDetailPage navigate={navigate} orderId={sub2} />;
+      else if (sub === 'orders') adminContent = <AdminOrdersPage navigate={navigate} />;
+      else if (sub === 'reports') adminContent = <AdminReportsPage navigate={navigate} />;
+      else if (sub === 'team') adminContent = <AdminTeamPage navigate={navigate} />;
+      else adminContent = <AdminPage navigate={navigate} />;
+      return <AdminMfaGate>{adminContent}</AdminMfaGate>;
     }
     return <HomePage navigate={navigate} />;
   }
