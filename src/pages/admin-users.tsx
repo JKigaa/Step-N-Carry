@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Search, Circle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -56,6 +57,7 @@ export function AdminUsersPage({ navigate }: AdminUsersPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   useEffect(() => {
     if (authLoading) return;
@@ -79,11 +81,15 @@ export function AdminUsersPage({ navigate }: AdminUsersPageProps) {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter(
-      (u) => u.email.toLowerCase().includes(q) || (u.full_name ?? '').toLowerCase().includes(q)
-    );
-  }, [users, search]);
+    return users.filter((u) => {
+      const matchStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' && isActive(u.last_sign_in_at)) ||
+        (statusFilter === 'inactive' && !isActive(u.last_sign_in_at));
+      const matchSearch = !q || u.email.toLowerCase().includes(q) || (u.full_name ?? '').toLowerCase().includes(q);
+      return matchStatus && matchSearch;
+    });
+  }, [users, search, statusFilter]);
 
   const activeCount = useMemo(() => users.filter((u) => isActive(u.last_sign_in_at)).length, [users]);
 
@@ -118,6 +124,19 @@ export function AdminUsersPage({ navigate }: AdminUsersPageProps) {
             <p className="text-2xl font-bold text-muted-foreground">{loading ? '...' : users.length - activeCount}</p>
             <p className="text-sm text-muted-foreground">Inactive</p>
           </div>
+        </div>
+
+        {/* Status filter tabs */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          <Button size="sm" variant={statusFilter === 'all' ? 'default' : 'outline'} onClick={() => setStatusFilter('all')}>
+            All ({users.length})
+          </Button>
+          <Button size="sm" variant={statusFilter === 'active' ? 'default' : 'outline'} onClick={() => setStatusFilter('active')}>
+            Active ({activeCount})
+          </Button>
+          <Button size="sm" variant={statusFilter === 'inactive' ? 'default' : 'outline'} onClick={() => setStatusFilter('inactive')}>
+            Inactive ({users.length - activeCount})
+          </Button>
         </div>
 
         <div className="mb-4 relative max-w-sm">
