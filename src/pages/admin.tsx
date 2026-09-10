@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut, Settings, User, Lock } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut, Settings, User, Lock, FileBarChart } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -152,7 +152,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
         </div>
 
         {/* Quick actions */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <button
             onClick={() => navigate('/admin/orders')}
             className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
@@ -175,6 +175,18 @@ export function AdminPage({ navigate }: AdminPageProps) {
             <div>
               <h3 className="text-lg font-bold">Manage Products</h3>
               <p className="text-sm text-muted-foreground">Add, edit, and manage your shoe inventory</p>
+            </div>
+          </button>
+          <button
+            onClick={() => navigate('/admin/reports')}
+            className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+              <FileBarChart className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">Reports</h3>
+              <p className="text-sm text-muted-foreground">Sales, orders, product, and customer reports</p>
             </div>
           </button>
         </div>
