@@ -381,6 +381,13 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
                       return String((product as any)[key]) !== String(value);
                     })
                   : Object.entries(proposed);
+
+                const currentSizes = new Map((product?.sizes ?? []).map((s) => [s.size, s.stock]));
+                const proposedSizes = new Map((req.proposed_sizes ?? []).map((s) => [s.size, s.stock]));
+                const allSizeKeys = Array.from(new Set([...currentSizes.keys(), ...proposedSizes.keys()]));
+                const sizeDiffs = allSizeKeys
+                  .map((size) => ({ size, before: currentSizes.get(size), after: proposedSizes.get(size) }))
+                  .filter((d) => d.before !== d.after);
                 return (
                   <div key={req.id} className="rounded-xl border border-amber-300 bg-amber-50/30 p-4">
                     <div className="mb-3 flex items-start justify-between">
@@ -401,10 +408,11 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
                       )}
                     </div>
                     <div className="space-y-3 text-sm">
-                      {changedFields.length === 0 ? (
-                        <p className="text-muted-foreground">No field changes detected (sizes/stock may have changed).</p>
+                      {changedFields.length === 0 && sizeDiffs.length === 0 ? (
+                        <p className="text-muted-foreground">No changes detected.</p>
                       ) : (
-                        changedFields.map(([key, value]) => {
+                        <>
+                          {changedFields.map(([key, value]) => {
                           if (key === 'images') {
                             const currentImages = product?.images ?? [];
                             const proposedImages = Array.isArray(value) ? (value as string[]) : [];
@@ -441,7 +449,27 @@ export function AdminProductsPage({ navigate }: AdminProductsPageProps) {
                               <span className="text-green-700">{String(value)}</span>
                             </div>
                           );
-                        })
+                        })}
+                          {sizeDiffs.length > 0 && (
+                            <div>
+                              <span className="font-medium">Sizes / Stock:</span>
+                              <div className="mt-1 space-y-0.5">
+                                {sizeDiffs.map((d) => (
+                                  <div key={d.size} className="flex items-center gap-2">
+                                    <span className="rounded border px-1.5 py-0.5 text-xs font-medium">{d.size}</span>
+                                    {d.before === undefined ? (
+                                      <span className="text-green-700">added, stock {d.after}</span>
+                                    ) : d.after === undefined ? (
+                                      <span className="text-red-600">removed (was stock {d.before})</span>
+                                    ) : (
+                                      <span>stock <span className="text-red-600 line-through">{d.before}</span> → <span className="text-green-700">{d.after}</span></span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
