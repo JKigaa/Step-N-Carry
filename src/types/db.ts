@@ -29,6 +29,8 @@ export interface Product {
   pending_deletion: boolean;
   submitted_by: string | null;
   deletion_requested_by: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
   created_at: string;
   updated_at: string;
 }
