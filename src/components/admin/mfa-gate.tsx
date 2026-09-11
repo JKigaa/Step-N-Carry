@@ -10,6 +10,10 @@ import { toast } from 'sonner';
 // How many times an admin may skip 2FA enrollment before it becomes mandatory.
 const SKIP_LIMIT = 3;
 
+// Temporarily disabled while we decide between TOTP/SMS/other approaches.
+// Flip back to true to re-enable enforcement -- nothing else needs to change.
+const MFA_ENABLED = false;
+
 type GateState = 'checking' | 'needs_enrollment' | 'needs_challenge' | 'ok';
 
 interface AdminMfaGateProps {
@@ -18,9 +22,10 @@ interface AdminMfaGateProps {
 
 export function AdminMfaGate({ children }: AdminMfaGateProps) {
   const { user, profile, isAdmin, loading: authLoading, refreshProfile } = useAuth();
-  const [state, setState] = useState<GateState>('checking');
+  const [state, setState] = useState<GateState>(MFA_ENABLED ? 'checking' : 'ok');
 
   const checkMfaStatus = async () => {
+    if (!MFA_ENABLED) { setState('ok'); return; }
     const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (error || !data) { setState('ok'); return; }
     if (data.currentLevel === 'aal2') { setState('ok'); return; }
