@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Search, Circle } from 'lucide-react';
+import { ArrowLeft, Search, Circle, UserMinus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
+import { toast } from 'sonner';
 
 interface AdminUsersPageProps {
   navigate: (to: string) => void;
@@ -78,6 +79,14 @@ export function AdminUsersPage({ navigate }: AdminUsersPageProps) {
       setLoading(false);
     })();
   }, [isSuperAdmin]);
+
+  const handleRemove = async (row: UserActivityRow) => {
+    if (!confirm(`Permanently delete ${row.full_name || row.email}'s account? This cannot be undone. Their order history will be kept, but their login and profile will be gone for good.`)) return;
+    const { error } = await supabase.rpc('delete_customer_account', { target_user_id: row.id });
+    if (error) { toast.error(error.message || 'Failed to delete account'); return; }
+    toast.success('Account deleted');
+    setUsers((prev) => prev.filter((u) => u.id !== row.id));
+  };
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -159,12 +168,13 @@ export function AdminUsersPage({ navigate }: AdminUsersPageProps) {
                   <th className="whitespace-nowrap px-4 py-3 font-semibold">Joined</th>
                   <th className="whitespace-nowrap px-4 py-3 font-semibold">Last Active</th>
                   <th className="whitespace-nowrap px-4 py-3 font-semibold">Status</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No users found.</td>
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No users found.</td>
                   </tr>
                 ) : (
                   filtered.map((row) => {
@@ -181,6 +191,13 @@ export function AdminUsersPage({ navigate }: AdminUsersPageProps) {
                             <Circle className={`h-2 w-2 ${active ? 'fill-green-600 text-green-600' : 'fill-muted-foreground text-muted-foreground'}`} />
                             {active ? 'Active' : 'Inactive'}
                           </span>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">
+                          {row.role === 'customer' && row.id !== user?.id && (
+                            <Button size="sm" variant="outline" onClick={() => handleRemove(row)}>
+                              <UserMinus className="mr-1.5 h-4 w-4" /> Remove
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     );
