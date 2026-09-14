@@ -16,6 +16,8 @@ export function SignInPage({ navigate }: AuthPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState('');
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
   if (!authLoading && user) {
@@ -30,14 +32,32 @@ export function SignInPage({ navigate }: AuthPageProps) {
       return;
     }
     setLoading(true);
+    setUnconfirmedEmail('');
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success('Signed in successfully');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to sign in');
+      const message = err instanceof Error ? err.message : 'Failed to sign in';
+      if (message.toLowerCase().includes('confirm')) {
+        setUnconfirmedEmail(email);
+      }
+      toast.error(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: unconfirmedEmail });
+      if (error) throw error;
+      toast.success('Confirmation email sent — check your inbox');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to resend confirmation email');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -98,6 +118,20 @@ export function SignInPage({ navigate }: AuthPageProps) {
             {loading ? 'Signing in...' : 'Sign In'} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </form>
+
+        {unconfirmedEmail && (
+          <div className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <p className="mb-2">Your email address hasn't been confirmed yet. Check your inbox for the confirmation link, or send a new one.</p>
+            <button
+              type="button"
+              onClick={handleResendConfirmation}
+              disabled={resending}
+              className="font-medium text-primary hover:underline disabled:opacity-60"
+            >
+              {resending ? 'Sending...' : 'Resend confirmation email'}
+            </button>
+          </div>
+        )}
 
        
 
