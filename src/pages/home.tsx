@@ -96,25 +96,35 @@ export function HomePage({ navigate }: HomePageProps) {
           </div>
 
           <div className="relative hidden lg:block">
-            <div className="grid grid-cols-2 gap-4">
-              <img
-                src={heroImages[0].src}
-                alt={heroImages[0].alt}
-                className="aspect-[3/4] w-full rounded-2xl object-cover shadow-lg"
-              />
-              <div className="flex flex-col gap-4">
-                <img
-                  src={heroImages[1].src}
-                  alt={heroImages[1].alt}
-                  className="aspect-square w-full rounded-2xl object-cover shadow-lg"
-                />
-                <img
-                  src={heroImages[2].src}
-                  alt={heroImages[2].alt}
-                  className="aspect-square w-full rounded-2xl object-cover shadow-lg"
-                />
+            {loading ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="aspect-[3/4] w-full animate-pulse rounded-2xl bg-muted shadow-lg" />
+                <div className="flex flex-col gap-4">
+                  <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted shadow-lg" />
+                  <div className="aspect-square w-full animate-pulse rounded-2xl bg-muted shadow-lg" />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <img
+                  src={heroImages[0].src}
+                  alt={heroImages[0].alt}
+                  className="aspect-[3/4] w-full rounded-2xl object-cover shadow-lg"
+                />
+                <div className="flex flex-col gap-4">
+                  <img
+                    src={heroImages[1].src}
+                    alt={heroImages[1].alt}
+                    className="aspect-square w-full rounded-2xl object-cover shadow-lg"
+                  />
+                  <img
+                    src={heroImages[2].src}
+                    alt={heroImages[2].alt}
+                    className="aspect-square w-full rounded-2xl object-cover shadow-lg"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
