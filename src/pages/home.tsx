@@ -79,7 +79,7 @@ export function HomePage({ navigate }: HomePageProps) {
               Step Into <span className="text-primary">Step N Carry</span> Style
             </h1>
             <p className="mt-4 max-w-md text-lg text-muted-foreground">
-              From sneakers to formal shoes, running trainers to elegant heels — browse, pick your size, and get delivery anywhere in Kenya.
+              From sneakers to formal shoes, running trainers to elegant heels, bags. Browse, pick your size, and get delivery anywhere in Kenya.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button size="lg" onClick={() => navigate('/shop')}>
