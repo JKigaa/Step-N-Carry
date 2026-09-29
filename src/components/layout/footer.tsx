@@ -47,6 +47,7 @@ export function Footer({ navigate }: FooterProps) {
               <li><button onClick={() => navigate('/shop?category=Formal')} className="hover:text-foreground">Formal</button></li>
               <li><button onClick={() => navigate('/shop?category=Running')} className="hover:text-foreground">Running</button></li>
               <li><button onClick={() => navigate('/shop?category=Heels')} className="hover:text-foreground">Heels</button></li>
+              <li><button onClick={() => navigate('/shop?category=Bags')} className="hover:text-foreground">Bags</button></li>
             </ul>
           </div>
 
