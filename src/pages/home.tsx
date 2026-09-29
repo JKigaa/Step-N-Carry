@@ -68,7 +68,7 @@ export function HomePage({ navigate }: HomePageProps) {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50/50">
+      <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-background to-amber-50/50">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(37,99,235,0.08),_transparent_50%)]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:py-20">
           <div className="animate-fade-up">

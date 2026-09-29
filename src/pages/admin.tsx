@@ -67,9 +67,9 @@ export function AdminPage({ navigate }: AdminPageProps) {
   if (authLoading || !user || !isAdmin) return null;
 
   const statusCards = [
-    { label: 'Order Received', key: 'Order Received', icon: Package, color: 'bg-blue-100 text-blue-700' },
+    { label: 'Order Received', key: 'Order Received', icon: Package, color: 'bg-stone-200 text-stone-700' },
     { label: 'Under Review', key: 'Order Under Review', icon: Clock, color: 'bg-amber-100 text-amber-700' },
-    { label: 'Preparing', key: 'Preparing Order', icon: ShoppingBag, color: 'bg-indigo-100 text-indigo-700' },
+    { label: 'Preparing', key: 'Preparing Order', icon: ShoppingBag, color: 'bg-yellow-100 text-yellow-700' },
     { label: 'Out for Delivery', key: 'Out for Delivery', icon: Truck, color: 'bg-purple-100 text-purple-700' },
     { label: 'Delivered', key: 'Delivered', icon: CheckCircle2, color: 'bg-green-100 text-green-700' },
     { label: 'Cancelled', key: 'Cancelled', icon: XCircle, color: 'bg-red-100 text-red-700' },
@@ -117,7 +117,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
         {/* Top stats */}
         <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: 'Total Orders', value: stats?.totalOrders ?? 0, icon: Package, color: 'text-blue-600 bg-blue-100' },
+            { label: 'Total Orders', value: stats?.totalOrders ?? 0, icon: Package, color: 'text-stone-700 bg-stone-200' },
             { label: 'Total Revenue', value: formatKsh(stats?.totalRevenue ?? 0), icon: TrendingUp, color: 'text-green-600 bg-green-100' },
             { label: 'Total Products', value: stats?.totalProducts ?? 0, icon: ShoppingBag, color: 'text-primary bg-primary/10' },
             { label: 'Low Stock Products', value: stats?.lowStockProducts ?? 0, icon: AlertTriangle, color: 'text-amber-600 bg-amber-100' },

@@ -187,7 +187,7 @@ export function OrderReviewPage({ navigate }: OrderReviewPageProps) {
             <div className="flex items-center gap-3 rounded-lg border border-border p-3">
               <RadioGroupItem value="card" id="card" />
               <Label htmlFor="card" className="flex flex-1 cursor-pointer items-center gap-2 font-normal">
-                <CreditCard className="h-5 w-5 text-blue-600" /> Card Payment (mock)
+                <CreditCard className="h-5 w-5 text-stone-600" /> Card Payment (mock)
               </Label>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border p-3">

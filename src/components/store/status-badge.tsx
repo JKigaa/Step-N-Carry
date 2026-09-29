@@ -6,11 +6,11 @@ interface StatusBadgeProps {
 }
 
 const statusStyles: Record<OrderStatus, string> = {
-  'Order Received': 'bg-blue-100 text-blue-700 border-blue-200',
+  'Order Received': 'bg-stone-200 text-stone-700 border-stone-300',
   'Order Under Review': 'bg-amber-100 text-amber-700 border-amber-200',
   'Payment Pending': 'bg-orange-100 text-orange-700 border-orange-200',
   'Payment Confirmed': 'bg-cyan-100 text-cyan-700 border-cyan-200',
-  'Preparing Order': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  'Preparing Order': 'bg-yellow-100 text-yellow-700 border-yellow-200',
   'Out for Delivery': 'bg-purple-100 text-purple-700 border-purple-200',
   'Delivered': 'bg-green-100 text-green-700 border-green-200',
   'Cancelled': 'bg-red-100 text-red-700 border-red-200',
