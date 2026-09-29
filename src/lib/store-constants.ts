@@ -33,6 +33,7 @@ export const SHOE_CATEGORIES = [
   'Sandals',
   'Kids',
   'Loafers',
+  'Bags',
 ];
 
 export const DEFAULT_DELIVERY_FEE = 300;
