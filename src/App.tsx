@@ -16,6 +16,7 @@ import { OrderConfirmationPage } from '@/pages/order-confirmation';
 import { SignInPage } from '@/pages/signin';
 import { SignUpPage } from '@/pages/signup';
 import { ForgotPasswordPage } from '@/pages/forgot-password';
+import { PoliciesPage } from '@/pages/policies';
 import { ResetPasswordPage } from '@/pages/reset-password';
 import { AccountPage } from '@/pages/account';
 import { AccountOrdersPage } from '@/pages/account-orders';
@@ -68,6 +69,7 @@ function AppShell() {
     if (top === 'signin') return <SignInPage navigate={navigate} />;
     if (top === 'signup') return <SignUpPage navigate={navigate} />;
     if (top === 'forgot-password') return <ForgotPasswordPage navigate={navigate} />;
+    if (top === 'policies') return <PoliciesPage navigate={navigate} />;
     if (top === 'account') {
       const sub = segments[1];
       if (sub === 'orders') return <AccountOrdersPage navigate={navigate} />;
