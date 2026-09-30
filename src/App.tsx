@@ -24,6 +24,8 @@ import { AdminPage } from '@/pages/admin';
 import { AdminProductsPage } from '@/pages/admin-products';
 import { AdminOrdersPage } from '@/pages/admin-orders';
 import { AdminOrderDetailPage } from '@/pages/admin-order-detail';
+import { AiAssistant } from '@/components/store/ai-assistant';
+import { WhatsAppButton } from '@/components/store/whatsapp-button';
 
 export default function App() {
   const router = useHashRouter();
@@ -85,6 +87,12 @@ export default function App() {
           <main className="flex-1">{renderPage()}</main>
           {!isAdminRoute && !isAccountRoute && <Footer navigate={navigate} />}
           <Toaster richColors position="bottom-right" />
+          {!isAdminRoute && (
+            <>
+              <AiAssistant />
+              <WhatsAppButton />
+            </>
+          )}
         </div>
       </CartProvider>
     </AuthProvider>
