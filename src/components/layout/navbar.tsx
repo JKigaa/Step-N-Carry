@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, User, Search, Menu, X, Package, LogOut, LayoutDashboard, Bell } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, Package, LogOut, LayoutDashboard, Bell, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -73,11 +73,9 @@ export function Navbar({ navigate, path }: NavbarProps) {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <button onClick={() => navigate('/')} className="flex shrink-0 items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-extrabold text-primary-foreground">F</span>
-          </div>
+          <img src="/logo-icon.png" alt="Step N Carry" className="h-9 w-auto rounded-lg" />
           <span className="hidden text-lg font-bold tracking-tight text-foreground sm:inline">
-            Fancy<span className="text-primary"> Shoes</span>
+            Step N<span className="text-primary"> Carry</span>
           </span>
         </button>
 
@@ -150,6 +148,9 @@ export function Navbar({ navigate, path }: NavbarProps) {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/account/orders')}>
                       <Package className="mr-2 h-4 w-4" /> My Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/account/password')}>
+                      <Lock className="mr-2 h-4 w-4" /> Change Password
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/account/notifications')}>
                       <Bell className="mr-2 h-4 w-4" /> Notifications

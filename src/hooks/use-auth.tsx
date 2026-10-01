@@ -60,13 +60,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsPasswordRecovery(true);
         }
       if (sess?.user) {
-        (async () => {
-          await fetchProfile(sess.user.id);
-        })();
+        fetchProfile(sess.user.id).finally(() => setLoading(false));
       } else {
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
@@ -97,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile,
         loading,
         isAdmin: profile?.role === 'admin',
-        isSuperAdmin: profile?.is_super_admin === true,
+        isSuperAdmin: profile?.role === 'admin' && profile?.is_super_admin === true,
         isPasswordRecovery,
         clearPasswordRecovery,
         refreshProfile,

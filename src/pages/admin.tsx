@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, Clock, Truck, CheckCircle2, XCircle, AlertTriangle, Users, BarChart3, LogOut, Settings, User, Lock, FileBarChart, UserCog } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
 import { formatKsh } from '@/lib/store-constants';
@@ -18,7 +24,7 @@ interface DashboardStats {
 }
 
 export function AdminPage({ navigate }: AdminPageProps) {
-  const { user, profile, isAdmin, loading: authLoading, signOut } = useAuth();
+  const { user, profile, isAdmin, isSuperAdmin, loading: authLoading, signOut } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -75,16 +81,29 @@ export function AdminPage({ navigate }: AdminPageProps) {
       <div className="border-b border-border/60 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <span className="font-extrabold text-primary-foreground">F</span>
-            </div>
+            <img src="/logo-icon.png" alt="Step N Carry" className="h-9 w-auto rounded-lg" />
             <div>
-              <p className="font-bold leading-none">Fancy Shoes Admin</p>
+              <p className="font-bold leading-none">Step N Carry Admin</p>
               <p className="text-xs text-muted-foreground">{profile?.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate('/')}>View Store</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" aria-label="Settings">
+                  <Settings className="mr-1 h-4 w-4" /> Settings
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/account/profile')}>
+                  <User className="mr-2 h-4 w-4" /> Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/account/password')}>
+                  <Lock className="mr-2 h-4 w-4" /> Change Password
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost" size="sm" onClick={() => signOut().then(() => navigate('/'))}>
               <LogOut className="mr-1 h-4 w-4" /> Sign Out
             </Button>
@@ -133,7 +152,7 @@ export function AdminPage({ navigate }: AdminPageProps) {
         </div>
 
         {/* Quick actions */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={`grid gap-4 sm:grid-cols-2 ${isSuperAdmin ? 'lg:grid-cols-5' : ''}`}>
           <button
             onClick={() => navigate('/admin/orders')}
             className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
@@ -158,6 +177,48 @@ export function AdminPage({ navigate }: AdminPageProps) {
               <p className="text-sm text-muted-foreground">Add, edit, and manage your shoe inventory</p>
             </div>
           </button>
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigate('/admin/reports')}
+              className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+                <FileBarChart className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Reports</h3>
+                <p className="text-sm text-muted-foreground">Sales, orders, product, and customer reports</p>
+              </div>
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigate('/admin/team')}
+              className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+                <UserCog className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Manage Admins</h3>
+                <p className="text-sm text-muted-foreground">Add or remove assistant admins</p>
+              </div>
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => navigate('/admin/users')}
+              className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-6 text-left transition-all hover:border-primary hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+                <Users className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Users</h3>
+                <p className="text-sm text-muted-foreground">See who's active and who isn't</p>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>

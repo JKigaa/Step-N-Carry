@@ -23,8 +23,6 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
   const [county, setCounty] = useState('');
   const [town, setTown] = useState('');
   const [saving, setSaving] = useState(false);
-  const [changingPassword, setChangingPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) { navigate('/signin'); return; }
@@ -54,23 +52,6 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
       toast.success('Profile updated');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-    setSaving(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      toast.success('Password updated');
-      setNewPassword('');
-      setChangingPassword(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to update password');
     } finally {
       setSaving(false);
     }
@@ -132,25 +113,6 @@ export function AccountProfilePage({ navigate }: AccountProfilePageProps) {
           <Save className="mr-2 h-4 w-4" /> {saving ? 'Saving...' : 'Save Changes'}
         </Button>
       </form>
-
-      {/* Password change */}
-      <div className="mt-6 rounded-xl border border-border/60 bg-card p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Change Password</h2>
-          <Button variant="outline" size="sm" onClick={() => setChangingPassword((v) => !v)}>
-            {changingPassword ? 'Cancel' : 'Change'}
-          </Button>
-        </div>
-        {changingPassword && (
-          <form onSubmit={handlePasswordChange} className="mt-4 space-y-3">
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" required minLength={6} />
-            </div>
-            <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Update Password'}</Button>
-          </form>
-        )}
-      </div>
     </div>
   );
 }
