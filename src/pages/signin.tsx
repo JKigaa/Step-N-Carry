@@ -1,4 +1,3 @@
-```tsx id="w8t3yk"
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +12,7 @@ interface AuthPageProps {
 }
 
 export function SignInPage({ navigate }: AuthPageProps) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,38 +20,28 @@ export function SignInPage({ navigate }: AuthPageProps) {
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      navigate(isAdmin ? '/admin' : '/account');
-    }
-  }, [user, isAdmin, navigate]);
+  if (!authLoading && user) {
+    navigate(isAdmin ? '/admin' : '/');
+  }
+}, [user, isAdmin, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email || !password) {
       toast.error('Please fill in all fields');
       return;
     }
-
     setLoading(true);
     setUnconfirmedEmail('');
-
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-
       toast.success('Signed in successfully');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to sign in';
-
       if (message.toLowerCase().includes('confirm')) {
         setUnconfirmedEmail(email);
       }
-
       toast.error(message);
     } finally {
       setLoading(false);
@@ -61,22 +50,12 @@ export function SignInPage({ navigate }: AuthPageProps) {
 
   const handleResendConfirmation = async () => {
     setResending(true);
-
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: unconfirmedEmail,
-      });
-
+      const { error } = await supabase.auth.resend({ type: 'signup', email: unconfirmedEmail });
       if (error) throw error;
-
       toast.success('Confirmation email sent — check your inbox');
     } catch (err) {
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : 'Failed to resend confirmation email'
-      );
+      toast.error(err instanceof Error ? err.message : 'Failed to resend confirmation email');
     } finally {
       setResending(false);
     }
@@ -86,26 +65,16 @@ export function SignInPage({ navigate }: AuthPageProps) {
     <div className="mx-auto flex min-h-[70vh] max-w-md items-center px-4 py-8 sm:px-6">
       <div className="w-full">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <span className="text-xl font-extrabold text-primary-foreground">
-              S
-            </span>
-          </div>
-
+          <img src="/logo-icon.png" alt="Step N Carry" className="mx-auto mb-3 h-16 w-auto rounded-xl" />
           <h1 className="text-2xl font-bold">Welcome Back</h1>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to your Step N Carry account
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to your Step N Carry account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-
             <div className="relative">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
               <Input
                 id="email"
                 type="email"
@@ -113,6 +82,7 @@ export function SignInPage({ navigate }: AuthPageProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-9"
+                autoComplete="username"
                 required
               />
             </div>
@@ -121,7 +91,6 @@ export function SignInPage({ navigate }: AuthPageProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-
               <button
                 type="button"
                 onClick={() => navigate('/forgot-password')}
@@ -130,15 +99,14 @@ export function SignInPage({ navigate }: AuthPageProps) {
                 Forgot password?
               </button>
             </div>
-
             <div className="relative">
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
+                autoComplete="current-password"
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-9"
                 required
@@ -146,43 +114,30 @@ export function SignInPage({ navigate }: AuthPageProps) {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={loading}
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-            <ArrowRight className="ml-2 h-4 w-4" />
+          <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </form>
 
         {unconfirmedEmail && (
           <div className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <p className="mb-2">
-              Your email address hasn't been confirmed yet. Check your inbox
-              for the confirmation link, or send a new one.
-            </p>
-
+            <p className="mb-2">Your email address hasn't been confirmed yet. Check your inbox for the confirmation link, or send a new one.</p>
             <button
               type="button"
               onClick={handleResendConfirmation}
               disabled={resending}
               className="font-medium text-primary hover:underline disabled:opacity-60"
             >
-              {resending
-                ? 'Sending...'
-                : 'Resend confirmation email'}
+              {resending ? 'Sending...' : 'Resend confirmation email'}
             </button>
           </div>
         )}
 
+       
+
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don't have an account?{' '}
-          <button
-            onClick={() => navigate('/signup')}
-            className="font-medium text-primary hover:underline"
-          >
+          <button onClick={() => navigate('/signup')} className="font-medium text-primary hover:underline">
             Create one
           </button>
         </p>
@@ -190,4 +145,3 @@ export function SignInPage({ navigate }: AuthPageProps) {
     </div>
   );
 }
-```

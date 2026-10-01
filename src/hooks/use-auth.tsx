@@ -16,7 +16,8 @@ interface AuthContextValue {
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-clearPasswordRecovery: () => void;
+  clearPasswordRecovery: () => void;
+  isPasswordRecovery: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -97,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         isAdmin: profile?.role === 'admin',
         isSuperAdmin: profile?.is_super_admin === true,
+        isPasswordRecovery,
         clearPasswordRecovery,
         refreshProfile,
         signOut,

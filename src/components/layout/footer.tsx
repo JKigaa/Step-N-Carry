@@ -1,4 +1,3 @@
-```tsx
 import { Mail, Phone, MapPin, Truck, Shield, RotateCcw } from 'lucide-react';
 
 interface FooterProps {
@@ -13,7 +12,7 @@ export function Footer({ navigate }: FooterProps) {
           {[
             { icon: Truck, title: 'Nationwide Delivery', desc: 'To all 47 counties' },
             { icon: Shield, title: 'Secure Checkout', desc: 'Your data is protected' },
-            { icon: RotateCcw, title: 'Easy Returns', desc: '7-day return policy' },
+            { icon: RotateCcw, title: 'Easy Returns', desc: '5-day return policy' },
           ].map((badge) => (
             <div key={badge.title} className="flex items-center gap-3 justify-center sm:justify-start">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -32,15 +31,11 @@ export function Footer({ navigate }: FooterProps) {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <span className="text-lg font-extrabold text-primary-foreground">S</span>
-              </div>
-              <span className="text-lg font-bold">
-                Step N<span className="text-primary"> Carry</span>
-              </span>
+              <img src="/logo-icon.png" alt="Step N Carry" className="h-9 w-auto rounded-lg" />
+              <span className="text-lg font-bold">Step N<span className="text-primary"> Carry</span></span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-              Quality footwear delivered to your doorstep, wherever you are in Kenya.
+              Kenya's premier online shoe store. Quality footwear delivered to your doorstep, wherever you are.
             </p>
           </div>
 
@@ -69,15 +64,9 @@ export function Footer({ navigate }: FooterProps) {
           <div>
             <h4 className="mb-3 text-sm font-semibold">Contact</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4" /> Contact us on WhatsApp
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> Contact us by email
-              </li>
-              <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> Nairobi, Kenya
-              </li>
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +254 702 918 650</li>
+              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@stepncarry.co.ke</li>
+              <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Nairobi, Kenya</li>
             </ul>
           </div>
         </div>
@@ -92,4 +81,3 @@ export function Footer({ navigate }: FooterProps) {
     </footer>
   );
 }
-```
