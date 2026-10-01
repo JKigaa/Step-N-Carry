@@ -4,8 +4,8 @@ export interface Profile {
   full_name: string;
   phone: string;
   role: 'customer' | 'admin';
-  is_super_admin: boolean;
-  mfa_skip_count: number;
+is_super_admin: boolean;
+mfa_skip_count: number;
   delivery_address: string;
   county: string;
   town: string;
@@ -25,12 +25,6 @@ export interface Product {
   is_available: boolean;
   is_featured: boolean;
   is_popular: boolean;
-  approval_status: 'pending' | 'approved' | 'rejected';
-  pending_deletion: boolean;
-  submitted_by: string | null;
-  deletion_requested_by: string | null;
-  approved_by: string | null;
-  approved_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -77,7 +71,6 @@ export interface Order {
   delivery_address: string;
   county: string;
   town: string;
-  payment_method: string | null;
   expected_delivery_date: string | null;
   expected_delivery_window: string;
   delivery_notes: string;
@@ -110,16 +103,3 @@ export interface Notification {
 export interface ProductWithSizes extends Product {
   sizes: ProductSize[];
 }
-
-export interface ProductEditRequest {
-  id: string;
-  product_id: string;
-  submitted_by: string | null;
-  status: 'pending' | 'approved' | 'rejected';
-  proposed_data: Record<string, unknown>;
-  proposed_sizes: { size: string; stock: number }[] | null;
-  reviewed_by: string | null;
-  reviewed_at: string | null;
-  created_at: string;
-}
-

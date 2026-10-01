@@ -16,8 +16,7 @@ interface AuthContextValue {
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  isPasswordRecovery: boolean;
-  clearPasswordRecovery: () => void;
+clearPasswordRecovery: () => void;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -55,14 +54,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, sess) => {
-      if (event === 'PASSWORD_RECOVERY') setIsPasswordRecovery(true);
       setSession(sess);
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+        }
       if (sess?.user) {
-        fetchProfile(sess.user.id).finally(() => setLoading(false));
+        (async () => {
+          await fetchProfile(sess.user.id);
+        })();
       } else {
         setProfile(null);
-        setLoading(false);
       }
+      setLoading(false);
     });
 
     return () => {
@@ -73,6 +76,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (session?.user) await fetchProfile(session.user.id);
+  };
+
+  const clearPasswordRecovery = () => {
+  setIsPasswordRecovery(false);
   };
 
   const signOut = async () => {
@@ -89,9 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile,
         loading,
         isAdmin: profile?.role === 'admin',
-        isSuperAdmin: profile?.role === 'admin' && profile?.is_super_admin === true,
-        isPasswordRecovery,
-        clearPasswordRecovery: () => setIsPasswordRecovery(false),
+        isSuperAdmin: profile?.is_super_admin === true,
+        clearPasswordRecovery,
         refreshProfile,
         signOut,
       }}

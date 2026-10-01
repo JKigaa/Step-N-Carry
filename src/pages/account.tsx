@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Package, User, Bell, ShoppingBag } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Package, User, Bell, Settings, ShoppingBag } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 interface AccountPageProps {
@@ -40,6 +41,9 @@ export function AccountPage({ navigate }: AccountPageProps) {
           <p className="text-sm text-muted-foreground">{profile?.email}</p>
           <p className="text-sm text-muted-foreground">{profile?.phone}</p>
         </div>
+        <Button variant="outline" onClick={() => navigate('/account/profile')}>
+          <Settings className="mr-2 h-4 w-4" /> Edit Profile
+        </Button>
       </div>
 
       {/* Quick access cards */}

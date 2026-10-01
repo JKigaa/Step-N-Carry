@@ -21,7 +21,6 @@ interface OrderWithProfile {
   phone: string;
   county: string;
   town: string;
-  payment_method: string | null;
   created_at: string;
 }
 
@@ -36,57 +35,18 @@ export function AdminOrdersPage({ navigate }: AdminOrdersPageProps) {
     if (!authLoading && (!user || !isAdmin)) { navigate('/signin'); return; }
   }, [user, isAdmin, authLoading, navigate]);
 
-      useEffect(() => {
-  if (!isAdmin) return;
-
-  let mounted = true;
-
-  const loadOrders = async () => {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('id, order_number, status, total, full_name, phone, county, town, created_at, payment_method')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('ORDERS LOAD ERROR:', error);
-    }
-
-    if (mounted) {
+  useEffect(() => {
+    if (!isAdmin) return;
+    (async () => {
+      const { data } = await supabase
+        .from('orders')
+        .select('id, order_number, status, total, full_name, phone, county, town, created_at')
+        .order('created_at', { ascending: false });
       setOrders((data ?? []) as OrderWithProfile[]);
       setLoading(false);
-    }
-  };
+    })();
+  }, [isAdmin]);
 
-  loadOrders();
-
-  const channel = supabase
-  .channel('admin-orders-realtime')
-  .on('system', '*', (payload) => {
-    console.log('REALTIME SYSTEM:', payload);
-  })
-  .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'orders',
-      },
-      (payload) => {
-        console.log('REALTIME ORDER CHANGE:', payload);
-        loadOrders();
-      }
-    )
-    .subscribe((status) => {
-      console.log('ADMIN ORDERS REALTIME:', status);
-    });
-
-  return () => {
-    mounted = false;
-    supabase.removeChannel(channel);
-  };
-}, [isAdmin]);
-
-    
   const filtered = orders.filter((o) => {
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
     const matchSearch = !search
@@ -154,10 +114,6 @@ export function AdminOrdersPage({ navigate }: AdminOrdersPageProps) {
                       <span className="ml-2 text-sm text-muted-foreground">{order.phone}</span>
                     </div>
                   </div>
-                    <span className="rounded-md border border-border/60 px-2 py-1 text-xs font-medium">
-                      {order.payment_method === "cod" ? "Pay on Delivery" : order.payment_method === "mpesa" ? "M-Pesa" : order.payment_method === "card" ? "Card Payment" : "Not specified"}
-                    </span>
-
                   <div className="flex items-center gap-3">
                     <StatusBadge status={order.status} />
                     <span className="font-bold">{formatKsh(order.total)}</span>

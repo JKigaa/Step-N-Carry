@@ -22,5 +22,4 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?*
-.tsbuildinfo
+*.sw?

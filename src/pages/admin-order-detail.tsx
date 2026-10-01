@@ -76,7 +76,7 @@ export function AdminOrderDetailPage({ navigate, orderId }: AdminOrderDetailPage
         'Payment Confirmed': `Payment for order ${order.order_number} has been confirmed. We'll start preparing your shoes.`,
         'Preparing Order': `We're preparing your order ${order.order_number}. It will be ready for delivery soon.`,
         'Out for Delivery': `Your order ${order.order_number} is out for delivery! ${deliveryDate ? `Expected: ${formatDate(deliveryDate)}${deliveryWindow ? ` between ${deliveryWindow}` : ''}` : ''}`,
-        'Delivered': `Your order ${order.order_number} has been delivered. Thank you for shopping with Step N Carry!`,
+        'Delivered': `Your order ${order.order_number} has been delivered. Thank you for shopping with Fancy Shoes!`,
         'Cancelled': `Your order ${order.order_number} has been cancelled. Contact us if you have any questions.`,
       };
 
@@ -214,14 +214,6 @@ export function AdminOrderDetailPage({ navigate, orderId }: AdminOrderDetailPage
                 <p className="flex items-center gap-1 text-muted-foreground"><Mail className="h-3.5 w-3.5" /> {order.email}</p>
               </div>
             </div>
-            {/* Payment method */}
-            <div className="rounded-xl border border-border/60 bg-card p-5">
-              <h2 className="mb-3 text-lg font-bold">Payment Method</h2>
-              <p className="text-sm font-medium">
-                {order.payment_method === "cod" ? "Pay on Delivery" : order.payment_method === "mpesa" ? "M-Pesa" : order.payment_method === "card" ? "Card Payment" : "Not specified"}
-              </p>
-            </div>
-
 
             {/* Delivery address */}
             <div className="rounded-xl border border-border/60 bg-card p-5">

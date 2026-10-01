@@ -21,7 +21,7 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
 
   useEffect(() => {
     if (user) {
-      navigate(isAdmin ? '/admin' : '/');
+      navigate(isAdmin ? '/admin' : '/account');
     }
   }, [user, isAdmin, navigate]);
 
@@ -50,10 +50,9 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
         },
       });
       if (error) throw error;
-     if (data.user) {
-  toast.success('Account created successfully');
-  navigate('/signin');
-}
+      if (data.user) {
+        toast.success('Account created successfully');
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create account');
     } finally {
@@ -65,9 +64,11 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
     <div className="mx-auto flex min-h-[70vh] max-w-md items-center px-4 py-8 sm:px-6">
       <div className="w-full">
         <div className="mb-6 text-center">
-          <img src="/logo-icon.png" alt="Step N Carry" className="mx-auto mb-3 h-16 w-auto rounded-xl" />
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+            <span className="text-xl font-extrabold text-primary-foreground">S</span>
+          </div>
           <h1 className="text-2xl font-bold">Create Account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Join Step N Carry and start shopping</p>
+          <p className="mt-1 text-sm text-muted-foreground">Join Fancy Shoes and start shopping</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,7 +83,6 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="pl-9"
-                autoComplete="name"
                 required
               />
             </div>
@@ -99,7 +99,6 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="pl-9"
-                autoComplete="tel"
                 required
               />
             </div>
@@ -116,7 +115,6 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-9"
-                autoComplete="username"
                 required
               />
             </div>
@@ -133,7 +131,6 @@ export function SignUpPage({ navigate }: SignUpPageProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-9"
-                autoComplete="new-password"
                 required
               />
             </div>
