@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { WhatsAppButton } from '@/components/layout/whatsapp-button';
+import { AiAssistant } from '@/components/store/ai-assistant';
 import { Toaster } from '@/components/ui/sonner';
 import { useHashRouter } from '@/hooks/use-router';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
@@ -100,6 +101,7 @@ function AppShell() {
       <main className="flex-1">{renderPage()}</main>
       {!isAdminRoute && !isAccountRoute && <Footer navigate={navigate} />}
       {!isAdminRoute && <WhatsAppButton />}
+      {!isAdminRoute && <AiAssistant navigate={navigate} />}
       <Toaster richColors position="bottom-right" />
     </div>
   );
