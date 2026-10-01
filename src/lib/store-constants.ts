@@ -38,8 +38,8 @@ export const SHOE_CATEGORIES = [
 
 export const DEFAULT_DELIVERY_FEE = 300;
 
-export const STORE_NAME = 'Fancy Shoes';
-export const STORE_TAGLINE = 'Kenya\'s Premier Online Shoe Store';
+export const STORE_NAME = 'Step N Carry';
+export const STORE_TAGLINE = 'Quality Footwear Delivered Across Kenya';
 
 export function formatKsh(amount: number): string {
   return 'KSh ' + amount.toLocaleString('en-KE');
