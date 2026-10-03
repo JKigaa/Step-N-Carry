@@ -5,6 +5,10 @@ import { supabase } from '@/lib/supabase';
 import { useCart } from '@/hooks/use-cart';
 import { formatKsh } from '@/lib/store-constants';
 
+// Temporarily disabled while Anthropic API usage/billing is being sorted out.
+// Flip back to true to re-enable -- nothing else needs to change.
+const AI_ASSISTANT_ENABLED = false;
+
 interface AssistantProduct {
   id: string;
   name: string;
@@ -109,6 +113,8 @@ export function AiAssistant({ navigate }: AiAssistantProps) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, open, loading]);
+
+  if (!AI_ASSISTANT_ENABLED) return null;
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
